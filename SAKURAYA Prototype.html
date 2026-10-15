@@ -1,0 +1,1440 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SAKURAYA Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Shippori+Mincho+B1:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: deep-indigo masthead with a seigaiha wave texture over a cool paper workspace.
+   Each role is a "pane" (two panes can sit side by side for presenting). Vermilion is reserved for the one primary action on screen. */
+:root {
+  --paper: #EEF0EC; --card: #FFFFFF; --sunken: #E4E8E1; --ink: #17213D; --ink2: #4B5775; --ink3: #6B7694; --line: #D3D9D0;
+  --band: #16213F; --band2: #22335C; --band-ink: #F2F0E8;
+  --shu: #C93A2B; --shu-ink: #FFFFFF; --shu-soft: #FBE6E2;
+  --gold: #B2812A; --gold-soft: #F6EBD0; --matcha: #3E7C54; --matcha-soft: #DDEEE2;
+  --info: #2D5E9E; --info-soft: #DCE8F7; --warn: #A86A12; --warn-soft: #F8E9CC; --bad: #B5322A; --bad-soft: #F9DEDA;
+  --s1: #2A78D6; --s2: #EB6834; --s3: #1BAF7A;
+  --shadow: 0 1px 2px rgba(22, 33, 63, .08), 0 10px 28px rgba(22, 33, 63, .08);
+  --r: 14px; --r-sm: 9px;
+  --f-disp: 'Shippori Mincho B1', 'Noto Serif Thai', 'Noto Serif', serif;
+  --f-body: 'Noto Sans Thai', 'Sarabun', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1527; --card: #172038; --sunken: #111A2F; --ink: #E8ECF6; --ink2: #A9B3CD; --ink3: #8591B0; --line: #2B3756;
+    --band: #101A34; --band2: #1D2C57; --shu: #DB4A39; --shu-soft: #3A1E22;
+    --gold: #D8A44A; --gold-soft: #3A2F18; --matcha: #5FAE7A; --matcha-soft: #1B3326;
+    --info: #6FA3E8; --info-soft: #1B2D4A; --warn: #E0A04A; --warn-soft: #3A2D16; --bad: #E56A5E; --bad-soft: #3B1D1D;
+    --s1: #3987E5; --s2: #D95926; --s3: #199E70;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1527; --card: #172038; --sunken: #111A2F; --ink: #E8ECF6; --ink2: #A9B3CD; --ink3: #8591B0; --line: #2B3756;
+  --band: #101A34; --band2: #1D2C57; --shu: #DB4A39; --shu-soft: #3A1E22;
+  --gold: #D8A44A; --gold-soft: #3A2F18; --matcha: #5FAE7A; --matcha-soft: #1B3326;
+  --info: #6FA3E8; --info-soft: #1B2D4A; --warn: #E0A04A; --warn-soft: #3A2D16; --bad: #E56A5E; --bad-soft: #3B1D1D;
+  --s1: #3987E5; --s2: #D95926; --s3: #199E70;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper); color: var(--ink); font: 400 15px/1.55 var(--f-body);
+    -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--f-disp); font-weight: 800; letter-spacing: .01em; text-wrap: balance; line-height: 1.25; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink2); } .faint { color: var(--ink3); }
+:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; border-radius: 6px; }
+
+/* ---------- masthead ---------- */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background-color: var(--band); color: var(--band-ink);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='24' viewBox='0 0 48 24'><g fill='none' stroke='white' stroke-opacity='.09' stroke-width='1.2'><circle cx='24' cy='24' r='22'/><circle cx='24' cy='24' r='16'/><circle cx='24' cy='24' r='10'/><circle cx='0' cy='12' r='22'/><circle cx='0' cy='12' r='16'/><circle cx='0' cy='12' r='10'/><circle cx='48' cy='12' r='22'/><circle cx='48' cy='12' r='16'/><circle cx='48' cy='12' r='10'/></g></svg>");
+  border-bottom: 3px solid var(--shu);
+}
+.top-in { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px max(16px, env(safe-area-inset-left, 0px)) 10px max(16px, env(safe-area-inset-right, 0px)); max-width: 1900px; margin: 0 auto; }
+.brand { display: flex; align-items: center; gap: 12px; margin-right: auto; min-width: 0; }
+.brand .mark { width: 40px; height: 40px; border-radius: 10px; background: var(--shu); display: grid; place-items: center; font-family: var(--f-disp); font-weight: 800; font-size: 22px; color: #fff; flex: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, .25) inset; }
+.brand b { font-family: var(--f-disp); font-size: 20px; letter-spacing: .14em; display: block; line-height: 1.1; }
+.brand small { opacity: .75; font-size: 12px; display: block; }
+.top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tbtn { background: rgba(255, 255, 255, .1); color: var(--band-ink); border: 1px solid rgba(255, 255, 255, .22); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; transition: background .15s; }
+.tbtn:hover { background: rgba(255, 255, 255, .2); }
+.tbtn[aria-pressed="true"] { background: var(--band-ink); color: var(--band); border-color: var(--band-ink); }
+.tbtn svg { width: 15px; height: 15px; }
+
+/* ---------- stage & panes ---------- */
+.stage { display: grid; gap: 14px; padding: 14px max(16px, env(safe-area-inset-left, 0px)) 90px max(16px, env(safe-area-inset-right, 0px)); max-width: 1900px; margin: 0 auto; grid-template-columns: minmax(0, 1fr); }
+.stage.split { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 1099px) { .stage.split { grid-template-columns: minmax(0, 1fr); } .split-only { display: none !important; } }
+.pane { position: relative; background: var(--sunken); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; container-type: inline-size; container-name: pane; display: flex; flex-direction: column; min-height: 0; }
+.stage.split .pane { height: calc(100dvh - 150px); min-height: 520px; }
+.pane-head { background: var(--card); border-bottom: 1px solid var(--line); padding: 8px 10px 0; }
+.roletabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding-bottom: 8px; }
+.roletab { border: 0; background: transparent; color: var(--ink2); padding: 7px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap; font-weight: 500; display: inline-flex; gap: 7px; align-items: center; transition: background .15s, color .15s; }
+.roletab:hover { background: var(--sunken); }
+.roletab[aria-selected="true"] { background: var(--band); color: var(--band-ink); }
+.roletab svg { width: 16px; height: 16px; }
+.roletab .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--matcha); }
+.subtabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; margin: 0 -2px; }
+.subtab { border: 0; background: transparent; padding: 9px 14px; cursor: pointer; color: var(--ink2); font-weight: 500; border-bottom: 3px solid transparent; white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+.subtab:hover { color: var(--ink); }
+.subtab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--shu); font-weight: 700; }
+.subtab .badge { background: var(--shu); color: var(--shu-ink); border-radius: 999px; font-size: 11px; min-width: 19px; height: 19px; padding: 0 5px; display: inline-grid; place-items: center; font-weight: 700; }
+.pane-body { flex: 1; overflow: auto; padding: 16px; position: relative; scroll-behavior: smooth; }
+.stage:not(.split) .pane-body { overflow: visible; min-height: 70vh; }
+.pane-body.enter > .view { animation: rise .35s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.pane-overlay { position: absolute; inset: 0; z-index: 12; pointer-events: none; }
+.pane-overlay > * { pointer-events: auto; }
+.stage:not(.split) .pane-overlay { position: fixed; z-index: 40; }
+
+/* ---------- generic ---------- */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); min-width: 0; }
+.card.flat { box-shadow: none; }
+.card h3 { font-size: 18px; margin-bottom: 4px; }
+.sec-title { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 4px 0 12px; }
+.sec-title h2 { font-size: 22px; }
+.sec-title p { font-size: 13px; color: var(--ink2); }
+.stack { display: grid; gap: 14px; min-width: 0; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.row.between { justify-content: space-between; }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.cols2 { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@container pane (min-width: 860px) { .cols2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .cols2.w21 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } .cols2.w12 { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); } }
+
+.btn { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 9px 16px; cursor: pointer; font-weight: 600; display: inline-flex; gap: 7px; align-items: center; justify-content: center; transition: transform .12s, box-shadow .12s, background .15s; min-height: 40px; }
+.btn:hover { background: var(--sunken); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--shu); border-color: var(--shu); color: var(--shu-ink); box-shadow: 0 6px 16px color-mix(in srgb, var(--shu) 30%, transparent); }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.indigo { background: var(--band2); border-color: var(--band2); color: #fff; }
+.btn.ok { background: var(--matcha); border-color: var(--matcha); color: #fff; }
+.btn.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+.btn.sm { padding: 5px 11px; min-height: 32px; font-size: 13px; border-radius: 8px; }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.iconbtn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); cursor: pointer; display: inline-grid; place-items: center; }
+.iconbtn:hover { background: var(--sunken); } .iconbtn svg { width: 16px; height: 16px; }
+
+.field { display: grid; gap: 5px; min-width: 0; }
+.field > span, .lbl { font-size: 13px; color: var(--ink2); font-weight: 500; }
+.in, select.in, textarea.in { width: 100%; border: 1px solid var(--line); background: var(--paper); border-radius: 10px; padding: 9px 12px; min-height: 42px; }
+.in:focus { outline: 3px solid color-mix(in srgb, var(--info) 45%, transparent); border-color: var(--info); }
+.in.err { border-color: var(--bad); }
+.fgrid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--paper); }
+.stepper button { width: 38px; height: 40px; border: 0; background: transparent; cursor: pointer; font-size: 18px; }
+.stepper button:hover { background: var(--sunken); }
+.stepper b { min-width: 40px; text-align: center; font-variant-numeric: tabular-nums; }
+.msg { border-radius: 10px; padding: 10px 12px; font-size: 14px; display: flex; gap: 9px; align-items: flex-start; }
+.msg svg { width: 18px; height: 18px; flex: none; margin-top: 2px; }
+.msg.err { background: var(--bad-soft); color: var(--bad); } .msg.ok { background: var(--matcha-soft); color: var(--matcha); }
+.msg.warn { background: var(--warn-soft); color: var(--warn); } .msg.info { background: var(--info-soft); color: var(--info); }
+.pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; background: var(--sunken); color: var(--ink2); white-space: nowrap; }
+.pill.ok { background: var(--matcha-soft); color: var(--matcha); } .pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); } .pill.info { background: var(--info-soft); color: var(--info); } .pill.gold { background: var(--gold-soft); color: var(--gold); }
+.pill.shu { background: var(--shu-soft); color: var(--shu); }
+.pill svg { width: 12px; height: 12px; }
+.uc { display: none; font: 600 10.5px/1 var(--f-body); letter-spacing: .04em; color: var(--info); background: var(--info-soft); border: 1px solid color-mix(in srgb, var(--info) 35%, transparent); border-radius: 6px; padding: 3px 6px; vertical-align: middle; margin-left: 6px; white-space: nowrap; }
+body.show-uc .uc { display: inline-block; }
+.empty { text-align: center; color: var(--ink2); padding: 28px 12px; border: 2px dashed var(--line); border-radius: var(--r); }
+.hint { font-size: 12.5px; color: var(--ink2); }
+kbd, .code { font: 600 12.5px/1 ui-monospace, 'SF Mono', Menlo, monospace; background: var(--sunken); border: 1px solid var(--line); border-radius: 6px; padding: 3px 7px; }
+button.code { cursor: pointer; } button.code:hover { background: var(--line); }
+hr.div { border: 0; border-top: 1px dashed var(--line); margin: 12px 0; }
+
+/* ---------- home ---------- */
+.hero { position: relative; overflow: hidden; border-radius: 20px; background: var(--band); color: var(--band-ink); padding: 34px 28px; isolation: isolate;
+  background-image: radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--shu) 55%, transparent), transparent 42%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='24' viewBox='0 0 48 24'><g fill='none' stroke='white' stroke-opacity='.08' stroke-width='1.2'><circle cx='24' cy='24' r='22'/><circle cx='24' cy='24' r='16'/><circle cx='24' cy='24' r='10'/><circle cx='0' cy='12' r='22'/><circle cx='0' cy='12' r='16'/><circle cx='0' cy='12' r='10'/><circle cx='48' cy='12' r='22'/><circle cx='48' cy='12' r='16'/><circle cx='48' cy='12' r='10'/></g></svg>"); }
+.hero .kanji { position: absolute; right: -10px; top: -30px; font-family: var(--f-disp); font-weight: 800; font-size: clamp(120px, 24cqw, 260px); opacity: .1; line-height: 1; z-index: -1; user-select: none; }
+.hero h1 { font-size: clamp(28px, 5.4cqw, 46px); max-width: 16ch; }
+.hero p { max-width: 54ch; opacity: .9; margin-top: 10px; }
+.hero .row { margin-top: 18px; }
+.eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; opacity: .8; margin-bottom: 8px; }
+.petal { position: absolute; top: -20px; width: 14px; height: 14px; background: var(--sakura, #F2B3C0); border-radius: 150% 0 150% 0; opacity: .0; animation: fall linear infinite; z-index: -1; }
+@keyframes fall { 0% { transform: translate(0, -20px) rotate(0); opacity: 0; } 10% { opacity: .75; } 100% { transform: translate(-90px, 340px) rotate(420deg); opacity: 0; } }
+.roles { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin-top: 16px; }
+.rolecard { text-align: left; border: 1px solid var(--line); background: var(--card); border-radius: var(--r); padding: 16px; cursor: pointer; display: grid; gap: 8px; transition: transform .15s, box-shadow .15s, border-color .15s; box-shadow: var(--shadow); }
+.rolecard:hover { transform: translateY(-3px); border-color: var(--shu); }
+.rolecard .ico { width: 46px; height: 46px; border-radius: 12px; background: var(--band); color: var(--band-ink); display: grid; place-items: center; }
+.rolecard .ico svg { width: 24px; height: 24px; }
+.rolecard h3 { font-size: 19px; } .rolecard p { font-size: 13.5px; color: var(--ink2); }
+.rolecard ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink2); }
+.journey { display: flex; gap: 0; overflow-x: auto; padding: 6px 2px 10px; margin-top: 8px; counter-reset: j; }
+.journey .step { flex: 1 0 118px; position: relative; padding: 0 6px; text-align: center; font-size: 13px; }
+.journey .step::before { content: ''; position: absolute; top: 19px; left: -50%; right: 50%; border-top: 2px dashed var(--line); z-index: 0; }
+.journey .step:first-child::before { display: none; }
+.journey .bub { position: relative; z-index: 1; width: 40px; height: 40px; margin: 0 auto 8px; border-radius: 50%; display: grid; place-items: center; background: var(--card); border: 2px solid var(--shu); color: var(--shu); }
+.journey .bub svg { width: 19px; height: 19px; }
+.facts { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); }
+.fact { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+.fact b { display: block; font: 800 26px/1.1 var(--f-disp); font-variant-numeric: tabular-nums; } .fact span { font-size: 12.5px; color: var(--ink2); }
+
+/* ---------- menu ---------- */
+.catbar { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; }
+.cat { flex: none; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 16px; cursor: pointer; display: inline-flex; gap: 8px; align-items: baseline; font-weight: 600; }
+.cat small { font-family: var(--f-disp); color: var(--ink3); font-size: 13px; }
+.cat[aria-pressed="true"] { background: var(--band); color: var(--band-ink); border-color: var(--band); } .cat[aria-pressed="true"] small { color: var(--band-ink); opacity: .7; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.searchbox { position: relative; flex: 1 1 220px; }
+.searchbox svg { position: absolute; left: 12px; top: 50%; translate: 0 -50%; width: 17px; height: 17px; color: var(--ink3); }
+.searchbox .in { padding-left: 38px; }
+.chk { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: 13px; cursor: pointer; background: var(--card); user-select: none; }
+.chk[aria-pressed="true"] { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); font-weight: 600; }
+.menu-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); margin-top: 12px; }
+.dish { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; transition: transform .18s, box-shadow .18s; position: relative; }
+.dish:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.dish .pic { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--sunken); }
+.art { width: 100%; height: 100%; display: block; transition: transform .35s; } .dish:hover .art { transform: scale(1.06) rotate(-1deg); }
+.dish .ja { position: absolute; left: 10px; bottom: 6px; font-family: var(--f-disp); font-weight: 800; color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, .55); font-size: 15px; }
+.dish .tag { position: absolute; left: 8px; top: 8px; }
+.dish .body { padding: 11px 13px 13px; display: grid; gap: 6px; flex: 1; align-content: start; }
+.dish h4 { font-family: var(--f-body); font-size: 15.5px; font-weight: 700; }
+.dish .desc { font-size: 12.5px; color: var(--ink2); line-height: 1.45; }
+.dish .foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 6px; }
+.price { font: 800 19px/1 var(--f-disp); font-variant-numeric: tabular-nums; }
+.alls { display: flex; gap: 4px; flex-wrap: wrap; }
+.alls .a { font-size: 11px; border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; color: var(--ink2); background: var(--paper); }
+.alls .a.hit { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); font-weight: 600; }
+.dish.sold .pic::after { content: 'หมด'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(15, 21, 39, .62); color: #fff; font: 800 34px var(--f-disp); letter-spacing: .1em; }
+.dish.sold { opacity: .85; }
+.stockleft { font-size: 12px; color: var(--warn); font-weight: 600; }
+.spicy { color: var(--shu); font-size: 12px; font-weight: 700; }
+.carttab { position: sticky; bottom: 4px; display: flex; justify-content: center; margin-top: 16px; z-index: 5; pointer-events: none; }
+.carttab .btn { pointer-events: auto; padding: 12px 22px; min-height: 48px; box-shadow: 0 14px 34px rgba(22, 33, 63, .35); }
+.bump { animation: bump .35s; } @keyframes bump { 40% { transform: scale(1.12); } }
+
+/* cart sheet */
+.sheet-wrap { position: absolute; inset: 0; background: rgba(10, 15, 30, .5); display: flex; justify-content: flex-end; animation: fade .2s; }
+.stage:not(.split) .sheet-wrap { position: fixed; }
+@keyframes fade { from { opacity: 0; } }
+.sheet { width: min(440px, 100%); background: var(--card); height: 100%; display: flex; flex-direction: column; animation: slide .25s ease; border-left: 1px solid var(--line); }
+@keyframes slide { from { transform: translateX(40px); opacity: 0; } }
+@container pane (max-width: 560px) { .sheet-wrap { align-items: flex-end; } .sheet { height: min(86%, 760px); border-radius: 20px 20px 0 0; width: 100%; } }
+.sheet header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.sheet .sbody { flex: 1; overflow: auto; padding: 14px 16px; display: grid; gap: 12px; align-content: start; }
+.sheet footer { padding: 14px 16px; border-top: 1px solid var(--line); display: grid; gap: 10px; }
+.line { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding-bottom: 12px; border-bottom: 1px dashed var(--line); }
+.line .thumb { width: 56px; height: 44px; border-radius: 8px; overflow: hidden; }
+.line .nm { font-weight: 600; font-size: 14.5px; }
+.total { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; }
+.total b { font: 800 26px var(--f-disp); font-variant-numeric: tabular-nums; }
+
+/* ---------- ticket, queue, qr ---------- */
+.ticket { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; overflow: hidden; box-shadow: var(--shadow); }
+.ticket::before, .ticket::after { content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%; background: var(--sunken); top: 62%; border: 1px solid var(--line); }
+.ticket::before { left: -12px; } .ticket::after { right: -12px; }
+.ticket .big { font: 800 56px/1 var(--f-disp); font-variant-numeric: tabular-nums; color: var(--shu); letter-spacing: .02em; }
+.pane-body.enter .ticket .big { animation: stamp .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes stamp { from { transform: scale(2.2) rotate(-8deg); opacity: 0; } }
+.ticket .perf { border-top: 2px dashed var(--line); margin: 14px -18px; }
+.qr { width: 150px; height: 150px; color: var(--ink); background: var(--card); border-radius: 12px; padding: 6px; border: 1px solid var(--line); }
+.ring { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--info); animation: spin 5s linear infinite; display: inline-block; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid color-mix(in srgb, currentColor 25%, transparent); border-top-color: currentColor; animation: spin .8s linear infinite; display: inline-block; vertical-align: -3px; }
+.bigclock { font: 800 34px/1 var(--f-disp); font-variant-numeric: tabular-nums; } .bigclock.late { color: var(--bad); animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+.waitbar { height: 8px; border-radius: 99px; background: var(--sunken); overflow: hidden; } .waitbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--info), var(--matcha)); border-radius: 99px; transition: width .6s; }
+
+/* ---------- order timeline ---------- */
+.otl { display: flex; gap: 0; margin: 12px 0 6px; }
+.otl .st { flex: 1; text-align: center; font-size: 11.5px; color: var(--ink3); position: relative; padding-top: 24px; }
+.otl .st::before { content: ''; position: absolute; top: 8px; left: -50%; right: 50%; height: 3px; background: var(--line); }
+.otl .st:first-child::before { display: none; }
+.otl .st::after { content: ''; position: absolute; top: 2px; left: calc(50% - 7px); width: 14px; height: 14px; border-radius: 50%; background: var(--card); border: 3px solid var(--line); }
+.otl .st.done { color: var(--ink); } .otl .st.done::before { background: var(--matcha); } .otl .st.done::after { background: var(--matcha); border-color: var(--matcha); }
+.otl .st.now { color: var(--shu); font-weight: 700; } .otl .st.now::before { background: var(--matcha); } .otl .st.now::after { border-color: var(--shu); background: var(--shu-soft); animation: pulse 1.4s infinite; }
+.progress { height: 10px; border-radius: 99px; background: var(--sunken); overflow: hidden; } .progress i { display: block; height: 100%; width: 0; background: var(--info); animation: grow 1.6s ease forwards; }
+@keyframes grow { to { width: 96%; } }
+.ord { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; background: var(--card); display: grid; gap: 8px; }
+.ord.cancelled { opacity: .6; } .ord.cancelled .nm { text-decoration: line-through; }
+.ord ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
+.ord li { display: flex; justify-content: space-between; gap: 10px; } .ord li small { display: block; color: var(--warn); }
+
+/* ---------- tables floor ---------- */
+.floor { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); }
+.tbl { border: 2px solid var(--line); border-radius: 16px; padding: 12px; background: var(--card); display: grid; gap: 6px; text-align: left; position: relative; transition: transform .15s, border-color .15s; }
+button.tbl { cursor: pointer; } button.tbl:hover:not([disabled]) { transform: translateY(-2px); }
+.tbl .tn { font: 800 24px/1 var(--f-disp); } .tbl .seat { font-size: 12px; color: var(--ink2); }
+.tbl.free { border-color: var(--matcha); background: color-mix(in srgb, var(--matcha-soft) 55%, var(--card)); }
+.tbl.occupied { border-color: var(--shu); background: color-mix(in srgb, var(--shu-soft) 60%, var(--card)); }
+.tbl.cleaning { border-color: var(--info); background: color-mix(in srgb, var(--info-soft) 60%, var(--card)); }
+.tbl.reserved { border-color: var(--gold); background: color-mix(in srgb, var(--gold-soft) 60%, var(--card)); }
+.tbl[disabled] { opacity: .5; cursor: not-allowed; }
+.tbl.pick { outline: 3px solid var(--info); }
+.seats { display: flex; gap: 3px; flex-wrap: wrap; } .seats i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; opacity: .35; }
+
+/* ---------- KDS ---------- */
+.kds { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@container pane (min-width: 900px) { .kds { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.kcol { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; display: grid; gap: 10px; align-content: start; min-height: 120px; }
+.kcol > h3 { font-size: 16px; display: flex; justify-content: space-between; align-items: center; padding: 4px 4px 0; }
+.tkt { border: 1px solid var(--line); border-left: 6px solid var(--info); border-radius: 10px; padding: 11px 12px; background: var(--paper); display: grid; gap: 8px; }
+.pane-body.enter .tkt { animation: rise .3s both; }
+.tkt.cooking { border-left-color: var(--gold); } .tkt.ready { border-left-color: var(--matcha); }
+.tkt.old { border-color: var(--bad); border-left-color: var(--bad); animation: none; box-shadow: 0 0 0 2px color-mix(in srgb, var(--bad) 25%, transparent); }
+.tkt .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.tkt .tid { font: 800 22px var(--f-disp); }
+.tkt .clk { font: 700 16px ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; } .tkt .clk.late { color: var(--bad); }
+.tkt ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 5px; }
+.tkt li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 6px; align-items: baseline; font-weight: 600; }
+.tkt li .q { font: 800 18px var(--f-disp); color: var(--shu); }
+.tkt .note { font-size: 12.5px; color: var(--warn); font-weight: 500; } .tkt .allw { font-size: 11.5px; color: var(--ink2); }
+.stk { display: grid; grid-template-columns: minmax(0, 1fr) 80px auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+.bar { height: 8px; border-radius: 99px; background: var(--sunken); overflow: hidden; } .bar i { display: block; height: 100%; border-radius: 99px; background: var(--matcha); } .bar.low i { background: var(--warn); } .bar.zero i { background: var(--bad); }
+
+/* ---------- owner ---------- */
+.kpis { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr)); }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; }
+.kpi span { font-size: 12.5px; color: var(--ink2); display: block; } .kpi b { font: 800 30px/1.15 var(--f-disp); font-variant-numeric: tabular-nums; display: block; margin: 2px 0; } .kpi small { font-size: 12px; }
+.goal { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+.goal small { grid-column: 1 / -1; color: var(--ink2); font-size: 12px; }
+.chart { width: 100%; display: block; overflow: visible; } .chart text { fill: var(--ink2); font: 500 11.5px var(--f-body); } .chart .gl { stroke: var(--line); stroke-width: 1; } .chart .lblv { fill: var(--ink); font-weight: 700; }
+.chart .bar-m { fill: var(--s1); transition: opacity .15s; } .chart .bar-m.today { fill: var(--shu); } .chart .hit { fill: transparent; cursor: pointer; } .chart g.col:hover .bar-m { opacity: .8; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--ink2); } .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.tip { position: fixed; z-index: 90; pointer-events: none; background: var(--band); color: var(--band-ink); font-size: 12.5px; padding: 7px 10px; border-radius: 8px; box-shadow: var(--shadow); max-width: 220px; translate: 12px 12px; }
+.stackbar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; gap: 2px; } .stackbar i { display: block; height: 100%; }
+.hbar { display: grid; grid-template-columns: minmax(0, 8.5em) minmax(0, 1fr) 3em; gap: 10px; align-items: center; font-size: 13.5px; padding: 3px 0; } .hbar .tr { height: 10px; background: var(--sunken); border-radius: 5px; overflow: hidden; } .hbar .tr i { display: block; height: 100%; background: var(--s1); border-radius: 0 5px 5px 0; } .hbar b { text-align: right; font-variant-numeric: tabular-nums; }
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; } table.t th { text-align: left; font-size: 12px; color: var(--ink2); font-weight: 600; padding: 8px 8px; border-bottom: 2px solid var(--line); white-space: nowrap; } table.t td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tscroll { overflow-x: auto; }
+.toggle { position: relative; width: 44px; height: 26px; border-radius: 99px; border: 0; background: var(--line); cursor: pointer; transition: background .2s; flex: none; } .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); } .toggle[aria-checked="true"] { background: var(--matcha); } .toggle[aria-checked="true"]::after { transform: translateX(18px); }
+.log { display: grid; gap: 6px; font-size: 13px; max-height: 340px; overflow: auto; } .log div { display: grid; grid-template-columns: 46px 64px minmax(0, 1fr); gap: 8px; } .log time { color: var(--ink3); font-variant-numeric: tabular-nums; }
+
+/* receipt */
+.receipt { max-width: 420px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 22px 22px 26px; position: relative; font-variant-numeric: tabular-nums; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), 96% 100%, 92% calc(100% - 10px), 88% 100%, 84% calc(100% - 10px), 80% 100%, 76% calc(100% - 10px), 72% 100%, 68% calc(100% - 10px), 64% 100%, 60% calc(100% - 10px), 56% 100%, 52% calc(100% - 10px), 48% 100%, 44% calc(100% - 10px), 40% 100%, 36% calc(100% - 10px), 32% 100%, 28% calc(100% - 10px), 24% 100%, 20% calc(100% - 10px), 16% 100%, 12% calc(100% - 10px), 8% 100%, 4% calc(100% - 10px), 0 100%); }
+.receipt .rl { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 2px 0; }
+.stamp { position: absolute; right: 18px; top: 74px; border: 3px solid var(--shu); color: var(--shu); border-radius: 10px; padding: 4px 12px; font: 800 20px var(--f-disp); transform: rotate(-12deg); letter-spacing: .12em; }
+.pane-body.enter .stamp { animation: stamp .6s .2s cubic-bezier(.2, 1.4, .4, 1) both; }
+.paymethods { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.pm { border: 2px solid var(--line); background: var(--card); border-radius: 14px; padding: 14px; cursor: pointer; text-align: left; display: grid; gap: 6px; transition: border-color .15s, transform .15s; } .pm:hover { transform: translateY(-2px); } .pm[aria-pressed="true"] { border-color: var(--shu); background: var(--shu-soft); } .pm svg { width: 26px; height: 26px; } .pm small { color: var(--ink2); font-size: 12px; }
+.slipbox { border: 2px dashed var(--line); border-radius: 12px; padding: 14px; text-align: center; display: grid; gap: 8px; justify-items: center; } .slipbox img { max-height: 160px; border-radius: 8px; }
+.radios { display: flex; gap: 6px; flex-wrap: wrap; }
+.radios label { display: inline-flex; gap: 6px; align-items: center; padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; cursor: pointer; background: var(--card); }
+.radios input:checked + span { font-weight: 700; }
+.radios label:has(input:checked) { border-color: var(--info); background: var(--info-soft); }
+
+/* ---------- demo panel & toasts ---------- */
+#demo { position: fixed; right: max(12px, env(safe-area-inset-right, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); width: min(340px, calc(100vw - 24px)); background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 60px rgba(10, 15, 30, .4); z-index: 60; padding: 14px; display: grid; gap: 10px; max-height: calc(100dvh - 90px); overflow: auto; animation: rise .25s; }
+#demo h3 { font-size: 17px; display: flex; justify-content: space-between; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; } .seg button { border: 0; background: var(--card); padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 13px; } .seg button[aria-pressed="true"] { background: var(--band); color: var(--band-ink); }
+.dswitch { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; }
+#toasts { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); display: grid; gap: 8px; z-index: 80; width: min(360px, calc(100vw - 24px)); pointer-events: none; }
+.toast { background: var(--band); color: var(--band-ink); border-radius: 12px; padding: 11px 14px; font-size: 14px; box-shadow: var(--shadow); border-left: 5px solid var(--info); animation: rise .3s both; pointer-events: auto; }
+.toast.ok { border-left-color: var(--matcha); } .toast.warn { border-left-color: var(--gold); } .toast.out { opacity: 0; transform: translateY(8px); transition: .35s; }
+
+@container pane (max-width: 520px) {
+  .pane-body { padding: 12px; } .hero { padding: 24px 18px; } .ticket .big { font-size: 46px; } .otl .st { font-size: 10.5px; }
+  .tkt .tid { font-size: 19px; } .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .dish .desc { display: none; } .dish .body { padding: 9px 10px 11px; } .price { font-size: 17px; }
+}
+@media (max-width: 520px) { .top-actions .tbtn span { display: none; } .tbtn { padding: 7px 10px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; } .petal { display: none; } }
+
+.split-only-wide { display: none; } @media (min-width: 1100px) { .split-only-wide { display: inline-flex; } }
+#demo[hidden] { display: none; }
+
+</style>
+<script>
+/* ===== data.js : brand, menu, mock data, dish illustrations ===== */
+const BRAND = { name: 'SAKURAYA', kanji: '桜屋', tag: 'ระบบสั่งอาหารร้านญี่ปุ่น' };
+
+const CATS = [
+  { id: 'sushi',   name: 'ซูชิ',          ja: '寿司' },
+  { id: 'sashimi', name: 'ซาชิมิ',        ja: '刺身' },
+  { id: 'noodle',  name: 'ราเม็ง & เส้น', ja: '麺' },
+  { id: 'don',     name: 'ข้าวหน้า',      ja: '丼' },
+  { id: 'fried',   name: 'ทอด & ย่าง',    ja: '揚焼' },
+  { id: 'sweet',   name: 'ของหวาน',       ja: '甘味' },
+  { id: 'drink',   name: 'เครื่องดื่ม',    ja: '飲物' }
+];
+
+const ALLERGENS = ['กุ้ง', 'ปลา', 'ไข่', 'นม', 'ถั่วเหลือง', 'ข้าวสาลี', 'งา'];
+
+/* art: [kind, main colour, accent colour] */
+const MENU_SEED = [
+  { id: 1,  cat: 'sushi',   name: 'ซูชิแซลมอน',        ja: 'サーモン握り',   price: 89,  all: ['ปลา', 'ถั่วเหลือง'],                    prep: 4,  stock: 40, art: ['nigiri', '#F27B52', '#FFD2B8'], tag: 'ขายดี',
+    desc: 'แซลมอนสดนอร์เวย์ ข้าวส้มปั้นมือ 2 ชิ้น' },
+  { id: 2,  cat: 'sushi',   name: 'ซูชิทูน่า',          ja: 'マグロ握り',     price: 99,  all: ['ปลา', 'ถั่วเหลือง'],                    prep: 4,  stock: 30, art: ['nigiri', '#B8323B', '#F4A3A8'],
+    desc: 'ทูน่าสีแดงสด เนื้อนุ่มละลายในปาก 2 ชิ้น' },
+  { id: 3,  cat: 'sushi',   name: 'ซูชิกุ้ง',           ja: '海老握り',       price: 79,  all: ['กุ้ง'],                                 prep: 4,  stock: 36, art: ['nigiri', '#F6A28C', '#FFE3D8'],
+    desc: 'กุ้งต้มหวาน ข้าวส้มปั้นมือ 2 ชิ้น' },
+  { id: 4,  cat: 'sushi',   name: 'ซูชิไข่หวาน',        ja: '玉子握り',       price: 59,  all: ['ไข่'],                                  prep: 3,  stock: 40, art: ['nigiri', '#F2C14E', '#FFF1B8'],
+    desc: 'ทามาโกะหวานหอม รัดสาหร่ายนอริ 2 ชิ้น' },
+  { id: 5,  cat: 'sushi',   name: 'แคลิฟอร์เนียโรล',    ja: 'カリフォルニア巻', price: 159, all: ['ไข่', 'งา', 'ถั่วเหลือง'],               prep: 7,  stock: 24, art: ['roll', '#F27B52', '#8CC084'], tag: 'แนะนำ',
+    desc: 'ปูอัด อะโวคาโด แตงกวา โรยงาขาว 8 ชิ้น' },
+  { id: 6,  cat: 'sushi',   name: 'สไปซี่ทูน่าโรล',      ja: 'スパイシーツナ巻', price: 179, all: ['ปลา', 'ไข่', 'งา'],                      prep: 7,  stock: 20, art: ['roll', '#C73E3A', '#F4A261'], spicy: 2,
+    desc: 'ทูน่าซอสเผ็ดมายองเนส เทมปุระเกล็ด 8 ชิ้น' },
+
+  { id: 7,  cat: 'sashimi', name: 'ซาชิมิแซลมอน',      ja: 'サーモン刺身',   price: 189, all: ['ปลา'],                                  prep: 5,  stock: 26, art: ['sashimi', '#F27B52', '#FFD9C2'], tag: 'ขายดี',
+    desc: 'แซลมอนสไลซ์หนา 5 ชิ้น เสิร์ฟกับหัวไชเท้าซอย' },
+  { id: 8,  cat: 'sashimi', name: 'ซาชิมิรวม 3 ชนิด',   ja: '刺身盛り合わせ', price: 289, all: ['ปลา', 'กุ้ง'],                           prep: 8,  stock: 14, art: ['sashimi', '#C73E3A', '#F6C1A5'],
+    desc: 'แซลมอน ทูน่า และกุ้งหวาน อย่างละ 3 ชิ้น' },
+  { id: 9,  cat: 'sashimi', name: 'ทาทากิปลาโอ',        ja: '鰹のたたき',     price: 169, all: ['ปลา', 'งา', 'ถั่วเหลือง'],               prep: 8,  stock: 12, art: ['sashimi', '#9B2D30', '#F2D9A0'],
+    desc: 'ปลาโออบไฟอ่อน ราดพอนซึ กระเทียมเจียว' },
+
+  { id: 10, cat: 'noodle',  name: 'โชยุราเม็ง',         ja: '醤油ラーメン',   price: 159, all: ['ข้าวสาลี', 'ถั่วเหลือง', 'ไข่'],          prep: 9,  stock: 30, art: ['ramen', '#B5702B', '#F2C14E'], tag: 'แนะนำ',
+    desc: 'น้ำซุปซีอิ๊วใส หมูชาชู ไข่ต้มยางมะตูม' },
+  { id: 11, cat: 'noodle',  name: 'ทงคตสึราเม็ง',       ja: '豚骨ラーメン',   price: 189, all: ['ข้าวสาลี', 'ไข่', 'ถั่วเหลือง', 'งา'],    prep: 10, stock: 22, art: ['ramen', '#EBDDBF', '#E26D4D'], tag: 'ขายดี',
+    desc: 'ซุปกระดูกหมูเคี่ยว 12 ชั่วโมง เส้นเล็กเหนียวนุ่ม' },
+  { id: 12, cat: 'noodle',  name: 'มิโสะราเม็ง',        ja: '味噌ラーメン', price: 169, all: ['ข้าวสาลี', 'ถั่วเหลือง', 'งา'], prep: 9, stock: 22, art: ['ramen', '#C98A3F', '#8CC084'],
+    desc: 'ซุปมิโสะเข้มข้น ข้าวโพด เนยก้อนละลาย' },
+  { id: 13, cat: 'noodle',  name: 'ซารุโซบะ',           ja: 'ざるそば',       price: 129, all: ['ข้าวสาลี', 'ถั่วเหลือง'],                prep: 6,  stock: 25, art: ['soba', '#B9A27C', '#6B7F5B'],
+    desc: 'โซบะเย็น เสิร์ฟกับซอสจิ้มสึยุและวาซาบิ' },
+  { id: 14, cat: 'noodle',  name: 'คิตสึเนะอุด้ง',       ja: 'きつねうどん',   price: 139, all: ['ข้าวสาลี', 'ถั่วเหลือง'],                prep: 8,  stock: 25, art: ['ramen', '#E8D7B0', '#D98B3A'],
+    desc: 'อุด้งเส้นอวบ เต้าหู้ทอดหวานนุ่ม น้ำซุปดาชิ' },
+
+  { id: 15, cat: 'don',     name: 'คัตสึด้ง',           ja: 'カツ丼',         price: 149, all: ['ข้าวสาลี', 'ไข่', 'ถั่วเหลือง'],          prep: 10, stock: 28, art: ['don', '#D79B45', '#F6D860'], tag: 'ขายดี',
+    desc: 'หมูทอดกรอบ ไข่ลวกนุ่ม ราดซอสหวานบนข้าวญี่ปุ่น' },
+  { id: 16, cat: 'don',     name: 'ยากินิกุด้ง',         ja: '焼肉丼',         price: 219, all: ['ถั่วเหลือง', 'งา'],                      prep: 10, stock: 18, art: ['don', '#7A3B2A', '#E9D8A6'],
+    desc: 'เนื้อสไลซ์ย่างซอสยากินิกุ ไข่แดงดอง' },
+  { id: 17, cat: 'don',     name: 'อุนะด้ง',            ja: 'うな丼',         price: 329, all: ['ปลา', 'ถั่วเหลือง'],                    prep: 12, stock: 10, art: ['don', '#5A2E1D', '#C98A3F'], tag: 'พรีเมียม',
+    desc: 'ปลาไหลย่างซอสคาบายากิ เสิร์ฟพร้อมซุปใส' },
+  { id: 18, cat: 'don',     name: 'อิคุระแซลมอนด้ง',     ja: 'いくらサーモン丼', price: 259, all: ['ปลา', 'ถั่วเหลือง'],                  prep: 8,  stock: 12, art: ['don', '#F27B52', '#E8452C'],
+    desc: 'แซลมอนสไลซ์ ไข่ปลาแซลมอนเม็ดโต บนข้าวส้ม' },
+
+  { id: 19, cat: 'fried',   name: 'เทมปุระกุ้ง 5 ชิ้น',  ja: '海老天ぷら',     price: 179, all: ['กุ้ง', 'ข้าวสาลี', 'ไข่'],               prep: 9,  stock: 24, art: ['tempura', '#E5A63A', '#C2602C'], tag: 'ขายดี',
+    desc: 'กุ้งตัวโตชุบแป้งบางกรอบ ซอสเทนสึยุ' },
+  { id: 20, cat: 'fried',   name: 'ยากิโทริ 4 ไม้',      ja: '焼き鳥',         price: 119, all: ['ถั่วเหลือง'],                           prep: 8,  stock: 30, art: ['skewer', '#C98A3F', '#7A3B2A'],
+    desc: 'อกไก่และสันในย่างถ่าน ราดซอสทาเระ' },
+  { id: 21, cat: 'fried',   name: 'เกี๊ยวซ่า 6 ชิ้น',    ja: '餃子',           price: 99,  all: ['ข้าวสาลี', 'ถั่วเหลือง', 'งา'],          prep: 7,  stock: 35, art: ['gyoza', '#9B5B2A', '#F1D8A8'],
+    desc: 'ไส้หมูกะหล่ำปลี ย่างกรอบด้านล่าง' },
+  { id: 22, cat: 'fried',   name: 'ซาบะย่างเกลือ',       ja: '鯖の塩焼き',     price: 169, all: ['ปลา'],                                  prep: 10, stock: 14, art: ['fish', '#6E8CA6', '#F2D9A0'],
+    desc: 'ปลาซาบะนอร์เวย์ย่างเกลือ เสิร์ฟกับมะนาว' },
+
+  { id: 23, cat: 'sweet',   name: 'โมจิไอศกรีม 3 ลูก',   ja: '雪見大福',       price: 89,  all: ['นม'],                                   prep: 3,  stock: 30, art: ['mochi', '#F3B6C6', '#BFD8A6'],
+    desc: 'สตรอว์เบอร์รี่ มัทฉะ และวานิลลา' },
+  { id: 24, cat: 'sweet',   name: 'โดรายากิ',           ja: 'どら焼き',       price: 69,  all: ['ไข่', 'ข้าวสาลี', 'นม'],                 prep: 3,  stock: 30, art: ['dora', '#B5702B', '#5A2E1D'],
+    desc: 'แพนเค้กญี่ปุ่นสอดไส้ถั่วแดงกวน' },
+  { id: 25, cat: 'sweet',   name: 'มัทฉะเค้ก',          ja: '抹茶ケーキ',     price: 119, all: ['ไข่', 'ข้าวสาลี', 'นม'],                 prep: 3,  stock: 16, art: ['cake', '#7FA66A', '#FFF3D6'], tag: 'แนะนำ',
+    desc: 'ชั้นเค้กมัทฉะอุจิ ครีมสดนุ่มบาง' },
+
+  { id: 26, cat: 'drink',   name: 'ชาเขียวร้อน',         ja: '煎茶',           price: 35,  all: [],                                       prep: 2,  stock: 60, art: ['tea', '#6F9A5B', '#E6F0D4'],
+    desc: 'เซนฉะแท้ ชงสดทุกถ้วย' },
+  { id: 27, cat: 'drink',   name: 'มัทฉะลาเต้',         ja: '抹茶ラテ',       price: 79,  all: ['นม'],                                   prep: 3,  stock: 40, art: ['tea', '#8FB36F', '#F6F1DE'],
+    desc: 'มัทฉะเข้มข้นผสมนมสด เลือกหวานน้อยได้' },
+  { id: 28, cat: 'drink',   name: 'ราเมเนะโซดา',        ja: 'ラムネ',         price: 59,  all: [],                                       prep: 1,  stock: 50, art: ['soda', '#4FA3D9', '#E1F2FB'],
+    desc: 'โซดาญี่ปุ่นลูกแก้วคลาสสิก' },
+  { id: 29, cat: 'drink',   name: 'ชาข้าวบาร์เลย์เย็น',  ja: '麦茶',           price: 45,  all: [],                                       prep: 1,  stock: 50, art: ['tea', '#C98A3F', '#F4E3C0'],
+    desc: 'มูงิฉะเย็นชื่นใจ ไม่มีคาเฟอีน' }
+];
+
+const MEMBERS = [
+  { user: 'member1', pass: '1234', name: 'คุณมินะ', role: 'customer' }
+];
+const STAFF_ACCOUNTS = {
+  staff:   { user: 'staff1', pass: '1234', name: 'คุณนก (พนักงานหน้าร้าน)' },
+  kitchen: { user: 'chef1',  pass: '1234', name: 'เชฟทาคุ (ครัว)' },
+  owner:   { user: 'owner',  pass: '1234', name: 'เจ้าของร้าน' }
+};
+
+const TABLE_SEATS = [2, 2, 2, 2, 4, 4, 4, 4, 6, 8];
+const SLOT_TIMES = (() => { const a = []; for (let h = 11; h <= 20; h++) { a.push(String(h).padStart(2, '0') + ':00'); a.push(String(h).padStart(2, '0') + ':30'); } return a; })();
+
+/* 7-day history shown on owner dashboard (mock) : [label offset days, sales, orders] */
+const HISTORY = [
+  { d: -6, sales: 18420, orders: 112 },
+  { d: -5, sales: 21350, orders: 131 },
+  { d: -4, sales: 19870, orders: 119 },
+  { d: -3, sales: 24560, orders: 148 },
+  { d: -2, sales: 31200, orders: 186 },
+  { d: -1, sales: 36840, orders: 214 }
+];
+const TOP_BASE = { 11: 41, 15: 38, 19: 36, 1: 34, 7: 31, 10: 29, 5: 24, 21: 22 };
+const PAY_BASE = { cash: 9, qr: 21, transfer: 12 };
+
+/* ===== dish illustrations (inline SVG, no external images) ===== */
+function art(a, big) {
+  const k = a[0], c1 = a[1], c2 = a[2];
+  const W = '#F8F6F0', DARK = '#1F2742', NORI = '#1B2A22';
+  let s = '';
+  const bg = `<rect width="160" height="120" fill="${c2}" opacity=".30"/><circle cx="128" cy="22" r="46" fill="${c2}" opacity=".45"/><circle cx="20" cy="108" r="38" fill="${c1}" opacity=".12"/>`;
+  const plate = `<ellipse cx="80" cy="94" rx="66" ry="15" fill="${DARK}" opacity=".9"/><ellipse cx="80" cy="91" rx="62" ry="13" fill="#2E3A63"/>`;
+  if (k === 'nigiri') {
+    const piece = x => `<rect x="${x - 24}" y="64" width="48" height="22" rx="11" fill="${W}"/><ellipse cx="${x}" cy="63" rx="31" ry="13" fill="${c1}"/><path d="M${x - 20} 60q20 -8 40 0" stroke="${c2}" stroke-width="2.4" fill="none" opacity=".8" stroke-linecap="round"/><path d="M${x - 16} 66q16 -6 32 0" stroke="${c2}" stroke-width="1.6" fill="none" opacity=".6" stroke-linecap="round"/>`;
+    s = plate + piece(52) + piece(108) + `<circle cx="80" cy="74" r="5" fill="#7FA66A"/>`;
+  } else if (k === 'roll') {
+    const m = (x, y) => `<circle cx="${x}" cy="${y}" r="17" fill="${NORI}"/><circle cx="${x}" cy="${y}" r="13.5" fill="${W}"/><circle cx="${x}" cy="${y}" r="7" fill="${c1}"/><circle cx="${x + 2}" cy="${y - 1}" r="3.4" fill="${c2}"/>`;
+    s = plate + m(44, 66) + m(80, 62) + m(116, 66) + m(62, 80) + m(98, 80);
+  } else if (k === 'sashimi') {
+    let sl = ''; for (let i = 0; i < 5; i++) { const ang = -32 + i * 16; sl += `<g transform="rotate(${ang} 80 98)"><rect x="68" y="42" width="24" height="46" rx="9" fill="${c1}"/><path d="M72 52q8 5 16 0M72 62q8 5 16 0M72 72q8 5 16 0" stroke="${c2}" stroke-width="2" fill="none" opacity=".75" stroke-linecap="round"/></g>`; }
+    s = plate + `<ellipse cx="80" cy="86" rx="40" ry="10" fill="#EAF1E0"/>` + sl + `<path d="M118 70q18 -12 10 -28q-14 8 -10 28z" fill="#5C8F57"/><circle cx="42" cy="82" r="6" fill="#8FBF6A"/>`;
+  } else if (k === 'ramen') {
+    s = `<path d="M26 60h108a54 46 0 0 1 -108 0z" fill="#F4F0E6"/><path d="M30 70h100" stroke="#C93A2B" stroke-width="5"/><path d="M40 80h80" stroke="#C93A2B" stroke-width="2.4" opacity=".7"/><ellipse cx="80" cy="60" rx="54" ry="13" fill="${c1}"/>` +
+      `<path d="M48 58q8 -6 14 0t14 0t14 0t14 0" stroke="#F6E7B6" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M52 63q8 -5 13 0t13 0t13 0" stroke="#F6E7B6" stroke-width="3" fill="none" stroke-linecap="round"/>` +
+      `<ellipse cx="62" cy="58" rx="12" ry="8" fill="#FFF8E7"/><circle cx="62" cy="58" r="5" fill="${c2}"/><circle cx="104" cy="60" r="8" fill="#FFF8E7"/><path d="M99 60q5 -5 10 0q-5 5 -10 0" stroke="#E26D4D" stroke-width="1.6" fill="none"/>` +
+      `<rect x="88" y="44" width="22" height="22" rx="3" fill="${NORI}" transform="rotate(14 99 55)"/><circle cx="78" cy="55" r="2.4" fill="#6FAE5A"/><circle cx="84" cy="62" r="2.4" fill="#6FAE5A"/><circle cx="72" cy="64" r="2.4" fill="#6FAE5A"/>` +
+      `<path d="M112 18l30 36M118 16l30 36" stroke="#C98A3F" stroke-width="3" stroke-linecap="round"/>`;
+  } else if (k === 'soba') {
+    s = `<rect x="24" y="52" width="112" height="46" rx="6" fill="#B58A57"/>` + (() => { let r = ''; for (let i = 0; i < 10; i++) r += `<line x1="${30 + i * 11}" y1="52" x2="${30 + i * 11}" y2="98" stroke="#8C6A40" stroke-width="2"/>`; return r; })() +
+      (() => { let r = ''; for (let i = 0; i < 7; i++) r += `<path d="M34 ${58 + i * 5.4}q20 -6 46 0t46 0" stroke="${c1}" stroke-width="3" fill="none" stroke-linecap="round"/>`; return r; })() +
+      `<rect x="108" y="22" width="34" height="24" rx="6" fill="#2E3A63"/><ellipse cx="125" cy="26" rx="14" ry="4" fill="#6B3E26"/><circle cx="116" cy="36" r="3" fill="#8FBF6A"/><rect x="26" y="34" width="26" height="8" rx="4" fill="${NORI}" opacity=".8"/>`;
+  } else if (k === 'don') {
+    s = `<path d="M30 58h100a50 40 0 0 1 -100 0z" fill="#C93A2B"/><path d="M36 70h88" stroke="#F3D58A" stroke-width="2.6" opacity=".8"/><ellipse cx="80" cy="58" rx="50" ry="12" fill="#7F2218"/><path d="M34 58q46 -42 92 0z" fill="${W}"/>` +
+      `<g transform="rotate(-10 80 44)"><rect x="46" y="32" width="68" height="13" rx="6" fill="${c1}"/><rect x="50" y="42" width="62" height="12" rx="6" fill="${c1}" opacity=".85"/></g>` +
+      `<circle cx="62" cy="30" r="6" fill="${c2}"/><circle cx="76" cy="26" r="6.5" fill="${c2}"/><circle cx="92" cy="30" r="5.6" fill="${c2}"/><path d="M104 28q8 -10 14 -2" stroke="#6FAE5A" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  } else if (k === 'tempura') {
+    const sh = (x, y, r) => `<g transform="rotate(${r} ${x} ${y})"><path d="M${x - 34} ${y}q0 -14 22 -14h28q20 0 20 14q0 14 -20 14h-28q-22 0 -22 -14z" fill="${c1}"/><path d="M${x + 36} ${y - 4}l16 -8l-2 12l8 8l-18 -2z" fill="${c2}"/><path d="M${x - 24} ${y - 6}q10 -5 20 0M${x - 4} ${y + 4}q10 5 22 0" stroke="#F8DE9A" stroke-width="2.4" fill="none" opacity=".8" stroke-linecap="round"/></g>`;
+    s = `<rect x="20" y="40" width="120" height="64" rx="8" fill="${DARK}" opacity=".9"/>` + sh(70, 56, -8) + sh(82, 82, 6) + `<ellipse cx="128" cy="84" rx="12" ry="8" fill="#EAF1E0"/><path d="M118 52l16 -6l4 12z" fill="#F2D24B"/>`;
+  } else if (k === 'skewer') {
+    let o = '';
+    for (let i = 0; i < 4; i++) { const y = 36 + i * 17; o += `<line x1="22" y1="${y + 8}" x2="138" y2="${y - 8}" stroke="#C9A36A" stroke-width="2.6" stroke-linecap="round"/>`; for (let j = 0; j < 4; j++) { const x = 44 + j * 24; o += `<rect x="${x}" y="${y - 7 - j * 4 + 8 - 8 * 0}" width="20" height="14" rx="6" fill="${c1}" transform="rotate(-8 ${x + 10} ${y})"/><path d="M${x + 4} ${y - 2 - j * 4 + 6}h12" stroke="${c2}" stroke-width="2" opacity=".7" stroke-linecap="round" transform="rotate(-8 ${x + 10} ${y})"/>`; } }
+    s = o;
+  } else if (k === 'gyoza') {
+    const g = x => `<path d="M${x - 24} 82q0 -26 24 -26t24 26z" fill="#F1D8A8"/><path d="M${x - 16} 62q16 -8 32 0" stroke="#D9B878" stroke-width="2" fill="none"/><path d="M${x - 22} 78h44" stroke="${c1}" stroke-width="5" opacity=".75" stroke-linecap="round"/><path d="M${x - 12} 60l2 -6M${x - 4} 58l2 -6M${x + 4} 58l2 -6M${x + 12} 60l2 -6" stroke="#D9B878" stroke-width="2" stroke-linecap="round"/>`;
+    s = plate + g(44) + g(80) + g(116);
+  } else if (k === 'fish') {
+    s = plate + `<path d="M28 72q28 -34 74 -14q16 6 28 -8l10 6l-4 16l4 16l-10 6q-12 -14 -28 -8q-46 20 -74 -14z" fill="${c1}"/><path d="M44 66q30 12 66 0" stroke="${c2}" stroke-width="3" fill="none" opacity=".7"/><path d="M50 74q28 10 54 0" stroke="${c2}" stroke-width="2" fill="none" opacity=".5"/><circle cx="42" cy="66" r="3.2" fill="${DARK}"/><path d="M60 70l0 -10M72 72l0 -12M84 72l0 -12M96 70l0 -10" stroke="#fff" stroke-width="2" opacity=".35"/><path d="M118 90q16 -4 22 4q-14 8 -22 -4z" fill="#F2D24B"/>`;
+  } else if (k === 'mochi') {
+    s = plate + `<circle cx="46" cy="76" r="19" fill="${c1}"/><circle cx="82" cy="70" r="21" fill="${c2}"/><circle cx="118" cy="76" r="19" fill="#F6EFE3"/>` + `<path d="M34 70q8 -10 20 -8M70 62q10 -8 24 -4M106 70q8 -10 20 -8" stroke="#fff" stroke-width="3" fill="none" opacity=".6" stroke-linecap="round"/><circle cx="130" cy="42" r="5" fill="#C93A2B"/><path d="M130 36q2 -6 6 -6" stroke="#5C8F57" stroke-width="2" fill="none"/>`;
+  } else if (k === 'dora') {
+    s = plate + `<ellipse cx="80" cy="74" rx="40" ry="17" fill="${c2}"/><ellipse cx="80" cy="70" rx="40" ry="17" fill="#8B5A2B"/><ellipse cx="80" cy="64" rx="40" ry="15" fill="${c1}"/><path d="M52 62q28 -10 56 0" stroke="#E6B97A" stroke-width="3" fill="none" opacity=".7" stroke-linecap="round"/><ellipse cx="108" cy="52" rx="12" ry="6" fill="#4A2A18"/>`;
+  } else if (k === 'cake') {
+    s = plate + `<path d="M30 84L118 84L118 56L30 56Z" fill="${c1}" transform="skewX(0)"/><rect x="30" y="64" width="88" height="6" fill="${c2}"/><rect x="30" y="76" width="88" height="5" fill="${c2}"/><path d="M30 56q44 -22 88 0z" fill="#9CC283"/><circle cx="74" cy="46" r="5" fill="#C93A2B"/><circle cx="126" cy="80" r="14" fill="${c2}" opacity=".9"/>`;
+  } else if (k === 'tea') {
+    s = `<ellipse cx="80" cy="98" rx="52" ry="9" fill="${DARK}" opacity=".85"/><path d="M44 52h72l-6 42q-1 6 -8 6h-44q-7 0 -8 -6z" fill="#F4F0E6"/><ellipse cx="80" cy="52" rx="36" ry="8" fill="${c1}"/><ellipse cx="80" cy="50" rx="28" ry="5" fill="${c2}" opacity=".55"/><path d="M116 62q22 2 14 20q-4 8 -16 6" stroke="#F4F0E6" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M64 38q-8 -10 0 -20M80 36q-8 -10 0 -22M96 38q-8 -10 0 -20" stroke="#fff" stroke-width="3" fill="none" opacity=".7" stroke-linecap="round"/>`;
+  } else if (k === 'soda') {
+    s = `<ellipse cx="80" cy="104" rx="30" ry="6" fill="${DARK}" opacity=".7"/><path d="M68 26h24v14q14 8 14 28v32q0 6 -6 6h-40q-6 0 -6 -6v-32q0 -20 14 -28z" fill="${c1}" opacity=".85"/><path d="M68 26h24v8h-24z" fill="#fff" opacity=".55"/><circle cx="80" cy="44" r="5" fill="#fff" opacity=".9"/><circle cx="72" cy="70" r="3" fill="#fff" opacity=".7"/><circle cx="88" cy="82" r="2.4" fill="#fff" opacity=".7"/><circle cx="82" cy="64" r="2" fill="#fff" opacity=".7"/><rect x="62" y="56" width="36" height="22" rx="4" fill="${c2}" opacity=".6"/>`;
+  }
+  return `<svg class="art${big ? ' art-big' : ''}" viewBox="0 0 160 120" role="img" aria-hidden="true" preserveAspectRatio="xMidYMid slice">${bg}${s}</svg>`;
+}
+
+/* QR-like pattern (sample only, not scannable) */
+function qrSVG(seed, label) {
+  let x = 0; for (let i = 0; i < seed.length; i++) x = (x * 31 + seed.charCodeAt(i)) >>> 0;
+  const rnd = () => { x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; };
+  const n = 25, c = 6; let r = '';
+  const finder = (ox, oy) => `<rect x="${ox * c}" y="${oy * c}" width="${7 * c}" height="${7 * c}" fill="currentColor"/><rect x="${(ox + 1) * c}" y="${(oy + 1) * c}" width="${5 * c}" height="${5 * c}" fill="var(--card)"/><rect x="${(ox + 2) * c}" y="${(oy + 2) * c}" width="${3 * c}" height="${3 * c}" fill="currentColor"/>`;
+  const inF = (i, j) => (i < 8 && j < 8) || (i > n - 9 && j < 8) || (i < 8 && j > n - 9);
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { if (inF(i, j)) continue; if (rnd() > 0.52) r += `<rect x="${i * c}" y="${j * c}" width="${c}" height="${c}" fill="currentColor"/>`; }
+  return `<svg class="qr" viewBox="-6 -6 ${n * c + 12} ${n * c + 12}" role="img" aria-label="${label || 'QR Code ตัวอย่าง'}">${r}${finder(0, 0)}${finder(n - 7, 0)}${finder(0, n - 7)}</svg>`;
+}
+
+/* ===== core.js : clock, state, rules (all in-memory, no database) ===== */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const baht = n => '฿' + Math.round(n).toLocaleString('en-US');
+const pad2 = n => String(n).padStart(2, '0');
+
+/* simulated clock so the demo can run 10x / 60x faster */
+const Clock = {
+  speed: 1, base: Date.now(), real: Date.now(),
+  now() { return this.base + (Date.now() - this.real) * this.speed; },
+  set(s) { this.base = this.now(); this.real = Date.now(); this.speed = s; }
+};
+const hhmm = ms => { const d = new Date(ms); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); };
+const isoDate = ms => { const d = new Date(ms); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+const thDate = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' }); };
+const mmss = ms => { ms = Math.max(0, Math.floor(ms / 1000)); return pad2(Math.floor(ms / 60)) + ':' + pad2(ms % 60); };
+const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const addDays = (iso, n) => { const [y, m, d] = iso.split('-').map(Number); return isoDate(new Date(y, m - 1, d + n).getTime()); };
+
+let S = null;
+const subs = [];
+let rafPending = false;
+function emit() {
+  if (rafPending) return; rafPending = true;
+  requestAnimationFrame(() => { rafPending = false; subs.forEach(f => f()); });
+}
+
+const menuItem = id => S.menu.find(m => m.id === id);
+const avail = m => !m.closed && m.stock > 0;
+const orderTotal = o => o.items.reduce((s, i) => s + i.price * i.qty, 0);
+const tableOf = id => S.tables.find(t => t.id === id);
+const custName = () => (S.cust.auth ? S.cust.auth.name : 'ลูกค้า');
+
+function initState() {
+  const t0 = Clock.now(), today = isoDate(t0), tomorrow = addDays(today, 1);
+  const menu = MENU_SEED.map(m => Object.assign({ closed: false, closedReason: '' }, m, { all: m.all.slice() }));
+  const tables = TABLE_SEATS.map((s, i) => ({ id: i + 1, seats: s, status: 'free', claimed: false }));
+  const set = (id, st, claimed) => { const t = tables[id - 1]; t.status = st; t.claimed = !!claimed; };
+  set(3, 'occupied', true); set(6, 'occupied', true); set(8, 'occupied', false); set(2, 'cleaning', false);
+  const nextSlot = (() => { const d = new Date(t0); let m = d.getHours() * 60 + (d.getMinutes() < 30 ? 30 : 60); m = Math.max(11 * 60, Math.min(m, 20 * 60 + 30)); return pad2(Math.floor(m / 60)) + ':' + pad2(m % 60); })();
+  const bookings = [
+    { no: 'BK-0401', name: 'คุณกานต์', phone: '0812345601', date: today, time: '19:00', people: 6, tableId: 9, status: 'booked' },
+    { no: 'BK-0402', name: 'คุณพิม', phone: '0812345602', date: today, time: '19:00', people: 8, tableId: 10, status: 'booked' },
+    { no: 'BK-0403', name: 'คุณวิน', phone: '0812345603', date: today, time: nextSlot, people: 3, tableId: 7, status: 'booked' },
+    { no: 'BK-0404', name: 'คุณเอก', phone: '0812345604', date: tomorrow, time: '19:00', people: 6, tableId: 9, status: 'booked' },
+    { no: 'BK-0405', name: 'คุณนุ่น', phone: '0812345605', date: tomorrow, time: '19:00', people: 8, tableId: 10, status: 'booked' }
+  ];
+  const mkq = (n, name, p, ago) => ({ no: 'A' + n, name, people: p, status: 'waiting', at: t0 - ago * 60000 });
+  const queue = { seq: 106, list: [mkq(101, 'คุณสมชาย', 2, 22), mkq(102, 'คุณอารีย์', 4, 19), mkq(103, 'คุณบอย', 3, 15), mkq(104, 'คุณฝน', 2, 11), mkq(105, 'คุณปุ๋ย', 5, 6)] };
+  const line = (id, qty, note) => { const m = menu.find(x => x.id === id); return { id, name: m.name, price: m.price, qty, note: note || '', art: m.art, all: m.all.slice() }; };
+  const orders = [
+    { id: 1001, tableId: 3, mine: false, who: 'โต๊ะ T3', items: [line(1, 2), line(10, 1, 'ไม่ใส่ต้นหอม')], status: 'cooking', createdAt: t0 - 6 * 60000, sentAt: t0 - 6 * 60000, startedAt: t0 - 3 * 60000, sendMs: 1100 },
+    { id: 1002, tableId: 6, mine: false, who: 'โต๊ะ T6', items: [line(15, 2), line(26, 2)], status: 'ready', createdAt: t0 - 14 * 60000, sentAt: t0 - 14 * 60000, startedAt: t0 - 9 * 60000, readyAt: t0 - 60000, sendMs: 1400 },
+    { id: 1003, tableId: 3, mine: false, who: 'โต๊ะ T3', items: [line(21, 1)], status: 'queued', createdAt: t0 - 60000, sentAt: t0 - 60000, sendMs: 900 }
+  ];
+  S = {
+    menu, tables, bookings, queue, orders, orderSeq: 1004, bookSeq: 406,
+    bills: {}, pays: [], log: [], lock: {}, seenSlips: new Set(),
+    auth: { customer: null, staff: null, kitchen: null, owner: null },
+    cust: { auth: null, tableId: null, seated: null, cart: [], queueNo: null, menuOpenedAt: null, myBookings: [], receipt: null },
+    failNext: false, recalcUntil: 0, calls: [], sold: Object.assign({}, TOP_BASE), orderTimes: [142000, 171000, 155000, 128000], sendTimes: [],
+    payMix: Object.assign({}, PAY_BASE), salesBase: 12480, ordersBase: 78, lostOrders: 0
+  };
+  logEv('system', 'เริ่มระบบ (ข้อมูลจำลอง)');
+}
+function logEv(role, text) { S.log.unshift({ at: Clock.now(), role, text }); if (S.log.length > 60) S.log.pop(); }
+
+/* ---------- toasts ---------- */
+function toast(msg, kind) {
+  const box = $('#toasts'); if (!box) return;
+  const el = document.createElement('div'); el.className = 'toast ' + (kind || 'info'); el.textContent = msg; el.setAttribute('role', 'status');
+  box.appendChild(el); setTimeout(() => el.classList.add('out'), 3600); setTimeout(() => el.remove(), 4000);
+  while (box.children.length > 4) box.firstChild.remove();
+}
+function notify(role, text, kind) {
+  logEv(role, text);
+  if (typeof visibleRoles === 'function' && visibleRoles().indexOf(role) >= 0) toast(text, kind || 'info');
+}
+
+/* ---------- login (UC-01): 5 wrong attempts lock 5 minutes ---------- */
+function lockLeft(role, user) {
+  const L = S.lock[role + ':' + String(user || '').trim().toLowerCase()];
+  return L && L.until > Clock.now() ? L.until - Clock.now() : 0;
+}
+function attemptLogin(role, user, pass) {
+  user = String(user || '').trim().toLowerCase();
+  const key = role + ':' + user, L = S.lock[key] || (S.lock[key] = { fails: 0, until: 0 }), now = Clock.now();
+  if (L.until > now) return { ok: false, locked: true, left: L.until - now };
+  if (L.until && L.until <= now) { L.fails = 0; L.until = 0; }
+  const acc = role === 'customer' ? MEMBERS.find(m => m.user === user) : (STAFF_ACCOUNTS[role].user === user ? STAFF_ACCOUNTS[role] : null);
+  if (acc && acc.pass === pass) { L.fails = 0; const a = { type: 'member', name: acc.name, user: acc.user }; if (role === 'customer') S.cust.auth = a; else S.auth[role] = a; logEv(role, 'เข้าสู่ระบบ: ' + acc.name); return { ok: true }; }
+  L.fails++;
+  if (L.fails >= 5) { L.until = now + 5 * 60000; logEv(role, 'ล็อกบัญชี ' + user + ' 5 นาที'); return { ok: false, locked: true, left: 5 * 60000 }; }
+  return { ok: false, left: 5 - L.fails };
+}
+function logout(role) { if (role === 'customer') S.cust.auth = null; else S.auth[role] = null; }
+
+/* ---------- booking (UC-07) ---------- */
+function findTableFor(date, time, people) {
+  const st = toMin(time);
+  return S.tables.filter(t => t.seats >= people).sort((a, b) => a.seats - b.seats)
+    .find(t => !S.bookings.some(b => b.status !== 'cancelled' && b.status !== 'noshow' && b.date === date && b.tableId === t.id && Math.abs(toMin(b.time) - st) < 120));
+}
+function slotIsPast(date, time) {
+  const n = Clock.now(); if (date !== isoDate(n)) return date < isoDate(n);
+  const d = new Date(n); return toMin(time) <= d.getHours() * 60 + d.getMinutes();
+}
+function makeBooking(f) {
+  const name = (f.name || '').trim(), phone = (f.phone || '').replace(/\D/g, '');
+  if (!name) return { ok: false, field: 'name', msg: 'กรุณากรอกชื่อผู้จอง' };
+  if (phone.length < 9 || phone.length > 10) return { ok: false, field: 'phone', msg: 'เบอร์โทรต้องมี 9–10 หลัก' };
+  if (!f.date) return { ok: false, field: 'date', msg: 'กรุณาเลือกวันที่' };
+  if (slotIsPast(f.date, f.time)) return { ok: false, field: 'time', msg: 'เวลานี้ผ่านไปแล้ว เลือกเวลาถัดไป' };
+  if (S.bookings.some(b => b.status === 'booked' && b.phone === phone && b.date === f.date && b.time === f.time)) return { ok: false, code: 'dup', msg: 'เบอร์นี้จองวันและเวลาเดียวกันไว้แล้ว (จองซ้ำ) กรุณาแก้ข้อมูลแล้วส่งใหม่' };
+  const t = findTableFor(f.date, f.time, f.people);
+  if (!t) {
+    const alts = SLOT_TIMES.filter(x => !slotIsPast(f.date, x) && findTableFor(f.date, x, f.people)).sort((a, b) => Math.abs(toMin(a) - toMin(f.time)) - Math.abs(toMin(b) - toMin(f.time))).slice(0, 4).sort();
+    return { ok: false, code: 'full', msg: 'ไม่มีโต๊ะว่างสำหรับ ' + f.people + ' คน ในเวลา ' + f.time + ' น.', alts };
+  }
+  const b = { no: 'BK-' + String(S.bookSeq++).padStart(4, '0'), name, phone, date: f.date, time: f.time, people: f.people, tableId: t.id, status: 'booked', mine: true };
+  S.bookings.push(b); S.cust.myBookings.push(b.no); logEv('customer', 'จองโต๊ะ ' + b.no + ' (T' + t.id + ')');
+  notify('staff', 'มีการจองใหม่ ' + b.no + ' · ' + b.people + ' คน · ' + b.time + ' น.');
+  return { ok: true, booking: b };
+}
+function cancelBooking(no) { const b = S.bookings.find(x => x.no === no); if (b && b.status === 'booked') { b.status = 'cancelled'; logEv('customer', 'ยกเลิกการจอง ' + no); } }
+
+/* ---------- queue (UC-06, UC-09) ---------- */
+const QUEUE_NOSHOW_MS = 10 * 60000;
+const queueAhead = no => { const l = S.queue.list; const i = l.findIndex(q => q.no === no); if (i < 0) return 0; return l.slice(0, i).filter(q => q.status === 'waiting').length; };
+function takeQueue(name, people) {
+  const no = 'A' + String(S.queue.seq++).padStart(3, '0');
+  S.queue.list.push({ no, name: name.trim() || 'ลูกค้า', people, status: 'waiting', at: Clock.now(), mine: true });
+  S.cust.queueNo = no; notify('staff', 'คิวใหม่ ' + no + ' (' + people + ' คน)'); return no;
+}
+function callNextQueue() {
+  const q = S.queue.list.find(x => x.status === 'waiting'); if (!q) return null;
+  q.status = 'called'; q.calledAt = Clock.now(); logEv('staff', 'เรียกคิว ' + q.no);
+  if (q.mine) toast('ถึงคิวของคุณแล้ว ' + q.no + ' กรุณามาที่หน้าร้านภายใน 10 นาที', 'ok');
+  return q;
+}
+function skipQueue(no, auto) {
+  const q = S.queue.list.find(x => x.no === no); if (!q) return;
+  q.status = 'skipped'; logEv('staff', (auto ? 'ข้ามคิวอัตโนมัติ (ไม่มาภายใน 10 นาที) ' : 'ข้ามคิว ') + no);
+  if (auto) notify('staff', 'คิว ' + no + ' ไม่มาภายใน 10 นาที ข้ามไปคิวถัดไป', 'warn');
+}
+function freeTablesFor(people) { return S.tables.filter(t => t.status === 'free' && t.seats >= people).sort((a, b) => a.seats - b.seats); }
+function seatQueue(no, tableId) {
+  const q = S.queue.list.find(x => x.no === no), t = tableOf(tableId); if (!q || !t || t.status !== 'free') return false;
+  q.status = 'seated'; q.tableId = tableId; t.status = 'occupied'; t.claimed = false;
+  if (q.mine) S.cust.seated = tableId;
+  logEv('staff', 'จัดโต๊ะ T' + tableId + ' ให้คิว ' + no); return true;
+}
+function confirmArrival(no, tableId) {
+  const b = S.bookings.find(x => x.no === no); if (!b || b.status !== 'booked') return false;
+  let t = tableOf(tableId || b.tableId);
+  if (!t || t.status !== 'free') t = freeTablesFor(b.people)[0];
+  if (!t) return false;
+  b.status = 'arrived'; b.seatedTable = t.id; t.status = 'occupied'; t.claimed = false;
+  if (b.mine) S.cust.seated = t.id;
+  logEv('staff', 'ยืนยันการมาถึง ' + no + ' → T' + t.id); return true;
+}
+function setTableStatus(id, st) {
+  const t = tableOf(id); if (!t) return; t.status = st; if (st === 'free') t.claimed = false; logEv('staff', 'เปลี่ยนสถานะ T' + id + ' เป็น ' + TABLE_STATUS[st].label);
+}
+const TABLE_STATUS = { free: { label: 'ว่าง' }, occupied: { label: 'มีลูกค้า' }, cleaning: { label: 'ทำความสะอาด' }, reserved: { label: 'จอง' } };
+function quickSeat() {
+  const t = S.tables.find(x => x.status === 'free' && x.seats >= 2); if (!t) return null;
+  t.status = 'occupied'; t.claimed = false; S.cust.seated = t.id; logEv('staff', 'จัดโต๊ะ T' + t.id + ' (เดโม)'); return t.id;
+}
+function scanTable(id) {
+  const t = tableOf(id); if (!t || t.status !== 'occupied' || t.claimed) return false;
+  t.claimed = true; S.cust.tableId = id; S.cust.menuOpenedAt = Clock.now(); logEv('customer', 'สแกน QR ที่โต๊ะ T' + id); return true;
+}
+
+/* ---------- ordering (UC-04, UC-13, UC-16) ---------- */
+function cartQty(id) { const l = S.cust.cart.find(x => x.id === id); return l ? l.qty : 0; }
+function addCart(id, d) {
+  const m = menuItem(id), c = S.cust.cart; let l = c.find(x => x.id === id);
+  if (!avail(m)) return { ok: false, msg: m.name + ' หมดแล้ว' };
+  if (!l) { if (d < 0) return { ok: true }; l = { id, qty: 0, note: '' }; c.push(l); }
+  const nq = l.qty + d;
+  if (nq > m.stock) return { ok: false, msg: m.name + ' เหลือเพียง ' + m.stock + ' ที่' };
+  l.qty = nq; if (l.qty <= 0) c.splice(c.indexOf(l), 1);
+  return { ok: true };
+}
+const cartTotal = () => S.cust.cart.reduce((s, l) => s + menuItem(l.id).price * l.qty, 0);
+const cartCount = () => S.cust.cart.reduce((s, l) => s + l.qty, 0);
+function placeOrder() {
+  const c = S.cust; if (!c.cart.length) return { ok: false, issues: ['ตะกร้าว่าง'] };
+  const issues = [];
+  c.cart.forEach(l => { const m = menuItem(l.id); if (!avail(m)) issues.push(m.name + ' หมดแล้ว กรุณาลบออกจากตะกร้า'); else if (m.stock < l.qty) issues.push(m.name + ' เหลือเพียง ' + m.stock + ' ที่'); });
+  if (issues.length) return { ok: false, issues };
+  const items = c.cart.map(l => { const m = menuItem(l.id); m.stock -= l.qty; S.sold[m.id] = (S.sold[m.id] || 0) + l.qty; return { id: m.id, name: m.name, price: m.price, qty: l.qty, note: l.note.trim(), art: m.art, all: m.all.slice() }; });
+  const o = { id: S.orderSeq++, tableId: c.tableId, mine: true, who: custName(), items, status: 'sending', createdAt: Clock.now(), realStart: Date.now(), sentAt: null, sendMs: null, fails: 0 };
+  S.orders.push(o); c.cart = [];
+  if (c.menuOpenedAt) { S.orderTimes.push(Clock.now() - c.menuOpenedAt); c.menuOpenedAt = Clock.now(); }
+  logEv('customer', 'ยืนยันคำสั่งซื้อ #' + o.id); attemptSend(o); return { ok: true, order: o };
+}
+function attemptSend(o) {
+  o.status = 'sending'; o.realStart = Date.now(); emit();
+  setTimeout(() => {
+    if (o.status !== 'sending') return;
+    if (S.failNext) {
+      S.failNext = false; o.status = 'send_failed'; o.fails++;
+      notify('staff', 'ออเดอร์ #' + o.id + ' โต๊ะ T' + o.tableId + ' ส่งครัวไม่สำเร็จ ระบบเก็บไว้และลองส่งใหม่', 'warn');
+      emit(); setTimeout(() => { if (o.status === 'send_failed') attemptSend(o); }, 4500); return;
+    }
+    o.status = 'queued'; o.sentAt = Clock.now(); o.sendMs = Date.now() - o.realStart; S.sendTimes.push(o.sendMs);
+    notify('kitchen', 'ออเดอร์ใหม่ #' + o.id + ' · โต๊ะ T' + o.tableId + ' (' + o.items.reduce((s, i) => s + i.qty, 0) + ' รายการ)', 'info'); emit();
+  }, 900 + Math.random() * 800);
+}
+const CANCELLABLE = ['sending', 'send_failed', 'queued'];
+function cancelOrder(id) {
+  const o = S.orders.find(x => x.id === id); if (!o || CANCELLABLE.indexOf(o.status) < 0) return false;
+  o.items.forEach(i => { const m = menuItem(i.id); m.stock += i.qty; S.sold[i.id] = Math.max(0, (S.sold[i.id] || 0) - i.qty); });
+  o.status = 'cancelled'; o.cancelledAt = Clock.now(); S.recalcUntil = Date.now() + 2000; setTimeout(emit, 2050);
+  notify('kitchen', 'ลูกค้ายกเลิกออเดอร์ #' + o.id + ' (ยังไม่เริ่มปรุง)', 'warn'); return true;
+}
+function startCooking(id) { const o = S.orders.find(x => x.id === id); if (!o || o.status !== 'queued') return; o.status = 'cooking'; o.startedAt = Clock.now(); logEv('kitchen', 'เริ่มปรุง #' + id); }
+function markReady(id) { const o = S.orders.find(x => x.id === id); if (!o || o.status !== 'cooking') return; o.status = 'ready'; o.readyAt = Clock.now(); notify('staff', 'พร้อมเสิร์ฟ: ออเดอร์ #' + id + ' โต๊ะ T' + o.tableId, 'ok'); if (o.mine) toast('อาหารของคุณพร้อมเสิร์ฟแล้ว', 'ok'); }
+function markServed(id) { const o = S.orders.find(x => x.id === id); if (!o || o.status !== 'ready') return; o.status = 'served'; o.servedAt = Clock.now(); logEv('staff', 'เสิร์ฟแล้ว #' + id); }
+function setClosed(id, closed, reason) { const m = menuItem(id); m.closed = closed; m.closedReason = closed ? (reason || 'วัตถุดิบหมด') : ''; logEv('kitchen', (closed ? 'ปิดเมนู ' : 'เปิดเมนู ') + m.name); if (closed) notify('staff', 'ปิดเมนู "' + m.name + '" (' + m.closedReason + ')', 'warn'); }
+function addMockOrder() {
+  const ts = [3, 6, 8], tid = ts[Math.floor(Math.random() * ts.length)], pool = S.menu.filter(avail), items = [];
+  for (let i = 0; i < 1 + Math.floor(Math.random() * 3); i++) { const m = pool[Math.floor(Math.random() * pool.length)]; if (!m || items.some(x => x.id === m.id) || m.stock < 1) continue; m.stock -= 1; S.sold[m.id] = (S.sold[m.id] || 0) + 1; items.push({ id: m.id, name: m.name, price: m.price, qty: 1, note: Math.random() < .3 ? 'เผ็ดน้อย' : '', art: m.art, all: m.all.slice() }); }
+  if (!items.length) return;
+  const o = { id: S.orderSeq++, tableId: tid, mine: false, who: 'โต๊ะ T' + tid, items, status: 'queued', createdAt: Clock.now(), sentAt: Clock.now(), sendMs: 1000 };
+  S.orders.push(o); notify('kitchen', 'ออเดอร์ใหม่ #' + o.id + ' · โต๊ะ T' + tid, 'info');
+}
+
+/* ---------- bill & payment (UC-08, UC-11) ---------- */
+const tableOrders = tid => S.orders.filter(o => o.tableId === tid && o.status !== 'cancelled' && !o.paid);
+const tableTotal = tid => tableOrders(tid).reduce((s, o) => s + orderTotal(o), 0);
+function openBill(tid, n) {
+  const total = tableTotal(tid); if (total <= 0) return null;
+  const base = Math.floor(total / n), parts = [];
+  for (let i = 0; i < n; i++) parts.push({ amount: i === n - 1 ? total - base * (n - 1) : base, status: 'unpaid', method: null });
+  S.bills[tid] = { total, n, parts, at: Clock.now() }; logEv('customer', 'ขอเช็คบิล T' + tid + ' ' + baht(total) + ' แยก ' + n + ' บิล'); return S.bills[tid];
+}
+function partPaid(tid, idx, method) {
+  const b = S.bills[tid], p = b.parts[idx]; p.status = 'paid'; p.method = method; p.paidAt = Clock.now();
+  S.pays.push({ tid, amount: p.amount, method, at: Clock.now() }); S.payMix[method] = (S.payMix[method] || 0) + 1;
+  logEv('system', 'บันทึกการชำระ T' + tid + ' ' + baht(p.amount) + ' (' + PAY_LABEL[method] + ')');
+  if (b.parts.every(x => x.status === 'paid')) finishBill(tid);
+}
+const PAY_LABEL = { cash: 'เงินสด', qr: 'สแกนจ่าย', transfer: 'โอนพร้อมสลิป' };
+function finishBill(tid) {
+  const b = S.bills[tid], os = tableOrders(tid);
+  const snap = { tid, total: b.total, parts: b.parts.map(p => Object.assign({}, p)), orders: os.map(o => ({ id: o.id, items: o.items.map(i => Object.assign({}, i)) })), at: Clock.now(), no: 'RC-' + (S.orderSeq + 5000) };
+  os.forEach(o => { o.paid = true; });
+  const t = tableOf(tid); if (t) { t.status = 'free'; t.claimed = false; }
+  delete S.bills[tid];
+  if (S.cust.tableId === tid) { S.cust.receipt = snap; S.cust.tableId = null; S.cust.seated = null; S.cust.cart = []; S.cust.auth = null; S.cust.queueNo = null; }
+  logEv('system', 'ปิดโต๊ะ T' + tid + ' → ว่าง · บันทึกลงรายงานยอดขาย');
+  notify('staff', 'โต๊ะ T' + tid + ' ชำระครบ เปลี่ยนสถานะเป็น "ว่าง"', 'ok');
+}
+function payCash(tid, idx) { const p = S.bills[tid].parts[idx]; p.status = 'cash_wait'; p.method = 'cash'; notify('staff', 'โต๊ะ T' + tid + ' ขอชำระเงินสด ' + baht(p.amount), 'warn'); }
+function confirmCash(tid, idx) { const b = S.bills[tid]; if (b && b.parts[idx] && b.parts[idx].status === 'cash_wait') partPaid(tid, idx, 'cash'); }
+function payQR(tid, idx) {
+  const p = S.bills[tid].parts[idx]; p.status = 'checking'; p.method = 'qr'; emit();
+  setTimeout(() => { if (S.bills[tid] && S.bills[tid].parts[idx] === p && p.status === 'checking') { partPaid(tid, idx, 'qr'); emit(); } }, 1500);
+}
+/* mode: ok | dup | mismatch ; sig identifies an uploaded file */
+function paySlip(tid, idx, sig, mode, cb) {
+  const p = S.bills[tid].parts[idx]; p.status = 'checking'; p.method = 'transfer'; emit();
+  setTimeout(() => {
+    if (!S.bills[tid] || S.bills[tid].parts[idx] !== p) return;
+    let res = 'ok';
+    if (sig && S.seenSlips.has(sig)) res = 'dup'; else if (mode === 'dup') res = 'dup'; else if (mode === 'mismatch') res = 'mismatch';
+    if (res === 'ok') { if (sig) S.seenSlips.add(sig); partPaid(tid, idx, 'transfer'); }
+    else { p.status = 'unpaid'; p.method = null; logEv('system', 'ตรวจสลิปไม่ผ่าน (' + (res === 'dup' ? 'สลิปซ้ำ' : 'ยอดไม่ตรง') + ') T' + tid); }
+    cb && cb(res); emit();
+  }, 1300);
+}
+
+/* ---------- derived numbers for owner ---------- */
+const salesToday = () => S.salesBase + S.pays.reduce((s, p) => s + p.amount, 0);
+const ordersToday = () => S.ordersBase + S.orders.filter(o => o.status !== 'cancelled' && o.id >= 1004).length;
+const avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0;
+
+/* ---------- global ticker ---------- */
+function tick() {
+  let changed = false; const now = Clock.now();
+  S.queue.list.forEach(q => { if (q.status === 'called' && now - q.calledAt >= QUEUE_NOSHOW_MS) { skipQueue(q.no, true); changed = true; } });
+  if (S.recalcUntil && Date.now() > S.recalcUntil) { S.recalcUntil = 0; changed = true; }
+  if (changed) emit();
+  updateTimers();
+}
+function updateTimers() {
+  const now = Clock.now();
+  $$('[data-t0]').forEach(el => {
+    const t0 = +el.dataset.t0, dur = +el.dataset.dur || 0;
+    if (el.dataset.mode === 'down') { const left = t0 + dur - now; el.textContent = mmss(left); el.classList.toggle('late', left < 60000); }
+    else { const e = now - t0; el.textContent = mmss(e); if (el.dataset.warn) el.classList.toggle('late', e > +el.dataset.warn); }
+  });
+}
+function isTyping() { const a = document.activeElement; return a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.type !== 'checkbox' && a.type !== 'radio' && a.type !== 'button'; }
+
+/* ===== ui.js : icons and small html helpers ===== */
+const ICONS = {
+  home: '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M17 14.5c3 0 5 1.6 5 4.5"/>',
+  chef: '<path d="M7 14v5h10v-5"/><path d="M7 14a4 4 0 1 1 1-7.8 4 4 0 0 1 8 0A4 4 0 1 1 17 14z"/>',
+  store: '<path d="M3 9l1.5-5h15L21 9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12v8h14v-8"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  ticket: '<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M14 7v10" stroke-dasharray="2 2.5"/>',
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 8H6"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  qr: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/>',
+  cash: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',
+  card: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+  slip: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  bell: '<path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/>',
+  flame: '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
+  table: '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M6 13v7M18 13v7M7 5h10"/>',
+  chart: '<path d="M4 20V4M4 20h16"/><rect x="8" y="12" width="3" height="6"/><rect x="13" y="8" width="3" height="10"/>',
+  utensils: '<path d="M6 3v7a2 2 0 0 0 2 2v9M10 3v7a2 2 0 0 1-2 2M18 3c-2 2-3 5-3 8h3v10"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/>',
+  split: '<rect x="3" y="4" width="8" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="16" rx="1.5"/>',
+  wand: '<path d="M5 19L19 5M15 3v4M13 5h4M19 11v4M17 13h4"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.2"/>',
+  refresh: '<path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/>',
+  receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  logout: '<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+  star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'
+};
+const ic = n => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>';
+const uc = code => '<span class="uc" title="Use Case ใน SRS">' + code + '</span>';
+const btn = (label, act, arg, cls, icon, extra) => '<button type="button" class="btn ' + (cls || '') + '" data-act="' + act + '"' + (arg != null ? ' data-arg="' + esc(arg) + '"' : '') + ' ' + (extra || '') + '>' + (icon ? ic(icon) : '') + label + '</button>';
+const inp = (ui, key, attrs, cls) => '<input class="in ' + (cls || '') + '" data-bind="' + key + '" value="' + esc(ui[key] == null ? '' : ui[key]) + '" ' + (attrs || '') + '>';
+const msg = (kind, html, icon) => '<div class="msg ' + kind + '" role="' + (kind === 'err' ? 'alert' : 'status') + '">' + ic(icon || (kind === 'ok' ? 'check' : kind === 'err' || kind === 'warn' ? 'alert' : 'info')) + '<div>' + html + '</div></div>';
+const emptyBox = (t, sub) => '<div class="empty"><b>' + t + '</b>' + (sub ? '<div class="hint" style="margin-top:4px">' + sub + '</div>' : '') + '</div>';
+const pill = (kind, text, icon) => '<span class="pill ' + kind + '">' + (icon ? ic(icon) : '') + text + '</span>';
+const stepper = (act, arg, val, label) => '<span class="stepper" role="group" aria-label="' + (label || '') + '"><button type="button" data-act="' + act + '" data-arg="' + arg + ':-1" aria-label="ลด">−</button><b>' + val + '</b><button type="button" data-act="' + act + '" data-arg="' + arg + ':1" aria-label="เพิ่ม">+</button></span>';
+
+const ORDER_STATUS = {
+  sending: { label: 'กำลังส่งไปครัว', kind: 'info' }, send_failed: { label: 'ส่งไม่สำเร็จ · กำลังลองใหม่', kind: 'bad' },
+  queued: { label: 'ครัวรับแล้ว · รอปรุง', kind: 'info' }, cooking: { label: 'กำลังปรุง', kind: 'gold' },
+  ready: { label: 'พร้อมเสิร์ฟ', kind: 'ok' }, served: { label: 'เสิร์ฟแล้ว', kind: 'ok' }, cancelled: { label: 'ยกเลิกแล้ว', kind: '' }
+};
+const STEP_NOW = { sending: 0, send_failed: 0, queued: 1, cooking: 2, ready: 3, served: 4 };
+const STEP_LABELS = ['ส่งแล้ว', 'ครัวรับ', 'กำลังปรุง', 'พร้อมเสิร์ฟ', 'เสิร์ฟแล้ว'];
+function timeline(status) {
+  const now = STEP_NOW[status]; if (now == null) return '';
+  return '<div class="otl" role="list" aria-label="สถานะออเดอร์">' + STEP_LABELS.map((l, i) => '<div role="listitem" class="st ' + (i < now || status === 'served' ? 'done' : i === now ? 'now' : '') + '">' + l + '</div>').join('') + '</div>';
+}
+const aggItems = orders => { const m = new Map(); orders.forEach(o => o.items.forEach(i => { const k = i.id; const e = m.get(k) || { name: i.name, price: i.price, qty: 0 }; e.qty += i.qty; m.set(k, e); })); return Array.from(m.values()); };
+const vatOf = t => Math.round(t * 7 / 107);
+
+/* ===== views_customer.js ===== */
+const VIEWS = {};
+
+function loginCard(p, role, opts) {
+  opts = opts || {};
+  const ui = p.ui, ku = 'lu_' + role, kp = 'lp_' + role, left = lockLeft(role, ui[ku]);
+  const acc = role === 'customer' ? MEMBERS[0] : STAFF_ACCOUNTS[role];
+  const titles = { customer: 'เข้าสู่ระบบสมาชิก', staff: 'พนักงานหน้าร้าน', kitchen: 'พนักงานครัว', owner: 'เจ้าของร้าน' };
+  return '<div class="card stack" style="max-width:460px;margin:0 auto">' +
+    '<div><h3>' + titles[role] + uc('UC-01') + '</h3><p class="hint">' + (opts.sub || 'ลงชื่อเข้าใช้เพื่อดำเนินการต่อ') + '</p></div>' +
+    '<form class="stack" data-submit="login" data-arg="' + role + '">' +
+    '<label class="field"><span>ชื่อผู้ใช้</span>' + inp(ui, ku, 'autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="' + acc.user + '"') + '</label>' +
+    '<label class="field"><span>รหัสผ่าน</span>' + inp(ui, kp, 'type="password" autocomplete="current-password" placeholder="••••"') + '</label>' +
+    (left > 0 ? msg('err', 'บัญชีถูกล็อกเพราะกรอกผิดครบ 5 ครั้ง ลองใหม่ได้ในอีก <b class="num" data-t0="' + Clock.now() + '" data-dur="' + left + '" data-mode="down">' + mmss(left) + '</b> นาที') :
+      (ui['lmsg_' + role] ? msg('err', ui['lmsg_' + role]) : '')) +
+    '<button class="btn primary block" ' + (left > 0 ? 'disabled' : '') + '>' + ic('user') + 'เข้าสู่ระบบ</button></form>' +
+    (opts.guest ? '<hr class="div"><button type="button" class="btn block" data-act="guest">ใช้งานแบบ Guest (ไม่ต้องล็อกอิน)</button>' : '') +
+    '<div class="hint">บัญชีทดลอง: <button type="button" class="code" data-act="fillcred" data-arg="' + role + '" title="กดเพื่อเติมอัตโนมัติ">' + acc.user + ' / ' + acc.pass + '</button> · ลองกรอกรหัสผิด 5 ครั้งเพื่อดูการล็อกบัญชี 5 นาที</div></div>';
+}
+
+/* ---------- customer: booking (UC-07) ---------- */
+function cBook(p) {
+  const ui = p.ui, res = ui.bres, today = isoDate(Clock.now());
+  const slots = SLOT_TIMES.map(t => { const past = slotIsPast(ui.bdate, t), full = !past && !findTableFor(ui.bdate, t, ui.bpeople); return '<option value="' + t + '"' + (ui.btime === t ? ' selected' : '') + (past ? ' disabled' : '') + '>' + t + ' น.' + (past ? ' · ผ่านไปแล้ว' : full ? ' · เต็ม' : '') + '</option>'; }).join('');
+  const mine = S.bookings.filter(b => b.mine || S.cust.myBookings.indexOf(b.no) >= 0);
+  const form = '<form class="card stack" data-submit="book"><div><h3>จองโต๊ะล่วงหน้า' + uc('UC-07') + '</h3><p class="hint">ระบบตรวจตารางโต๊ะให้ทันที หากซ้ำหรือโต๊ะเต็มจะบอกเวลาที่ว่างใกล้เคียง</p></div>' +
+    '<div class="fgrid"><label class="field"><span>ชื่อผู้จอง</span>' + inp(ui, 'bname', 'autocomplete="name" placeholder="เช่น คุณมินะ"', res && res.field === 'name' ? 'err' : '') + '</label>' +
+    '<label class="field"><span>เบอร์โทร</span>' + inp(ui, 'bphone', 'inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxx"', res && res.field === 'phone' ? 'err' : '') + '</label></div>' +
+    '<div class="fgrid"><label class="field"><span>วันที่</span><input class="in" type="date" data-bind="bdate" data-rr="1" min="' + today + '" value="' + esc(ui.bdate) + '"></label>' +
+    '<label class="field"><span>เวลา</span><select class="in ' + (res && res.field === 'time' ? 'err' : '') + '" data-bind="btime" data-rr="1">' + slots + '</select></label>' +
+    '<div class="field"><span>จำนวนคน</span>' + stepper('bpeople', 'x', ui.bpeople, 'จำนวนคน') + '</div></div>' +
+    (res && !res.ok ? msg('err', esc(res.msg)) + (res.alts && res.alts.length ? '<div class="row"><span class="hint">เวลาที่ยังว่าง:</span>' + res.alts.map(t => '<button type="button" class="btn sm" data-act="pickalt" data-arg="' + t + '">' + t + ' น.</button>').join('') + '</div>' : '') : '') +
+    '<button class="btn primary">' + ic('check') + 'ยืนยันการจอง</button>' +
+    '<p class="hint">ลองทดสอบ: จอง 7 คน เวลา 19:00 น. (โต๊ะใหญ่เต็ม) · หรือส่งซ้ำด้วยเบอร์และเวลาเดิมเพื่อดูกรณีจองซ้ำ</p></form>';
+  let ticket = '';
+  if (res && res.ok) {
+    const b = res.booking;
+    ticket = '<div class="ticket" role="status"><div class="row between"><span class="pill ok">' + ic('check') + 'จองสำเร็จ</span><span class="faint">' + esc(BRAND.name) + '</span></div><div style="margin-top:10px" class="lbl">เลขที่การจอง</div><div class="big" style="font-size:38px">' + b.no + '</div><div class="perf"></div>' +
+      '<div class="row between"><div><div class="lbl">วันและเวลา</div><b>' + thDate(b.date) + ' · ' + b.time + ' น.</b></div><div><div class="lbl">จำนวน</div><b>' + b.people + ' คน</b></div><div><div class="lbl">โต๊ะ</div><b>T' + b.tableId + '</b></div></div>' +
+      '<p class="hint" style="margin-top:10px">แสดงเลขที่การจองกับพนักงานเมื่อมาถึงร้านเพื่อยืนยันการมาถึง</p></div>';
+  }
+  const list = '<div class="card stack"><h3>การจองของฉัน</h3>' + (mine.length ? mine.map(b => '<div class="row between" style="border-bottom:1px dashed var(--line);padding-bottom:8px"><div><b class="num">' + b.no + '</b> <span class="pill ' + (b.status === 'booked' ? 'info' : b.status === 'arrived' ? 'ok' : '') + '">' + ({ booked: 'รอมาถึง', arrived: 'มาถึงแล้ว', cancelled: 'ยกเลิก', noshow: 'ไม่มา' }[b.status]) + '</span><div class="hint">' + thDate(b.date) + ' · ' + b.time + ' น. · ' + b.people + ' คน · T' + b.tableId + '</div></div>' + (b.status === 'booked' ? btn('ยกเลิก', 'cbook', b.no, 'sm danger') : '') + '</div>').join('') : '<p class="hint">ยังไม่มีการจอง</p>') + '</div>';
+  return '<div class="view cols2 w21"><div class="stack">' + form + '</div><div class="stack">' + ticket + list + '</div></div>';
+}
+
+/* ---------- customer: queue (UC-06) ---------- */
+function cQueue(p) {
+  const ui = p.ui, c = S.cust, q = c.queueNo ? S.queue.list.find(x => x.no === c.queueNo) : null;
+  const serving = S.queue.list.filter(x => x.status === 'called' || x.status === 'seated').slice(-1)[0];
+  const waiting = S.queue.list.filter(x => x.status === 'waiting').length;
+  let left;
+  if (!q || q.status === 'skipped' || q.status === 'seated' && false) {
+    const skipped = q && q.status === 'skipped';
+    left = '<div class="card stack">' + (skipped ? msg('warn', 'คิว ' + q.no + ' ถูกข้ามเพราะไม่มาภายใน 10 นาที กรุณารับคิวใหม่') : '') + '<div><h3>รับคิวด้วย QR Code' + uc('UC-06') + '</h3><p class="hint">สแกน QR หน้าร้านแล้วรอรับแจ้งเตือนบนมือถือ ไม่ต้องยืนรอ</p></div>' +
+      '<div class="row" style="align-items:flex-start;gap:18px">' + qrSVG('SAKURAYA-QUEUE-FRONT') + '<div class="stack" style="flex:1 1 220px">' +
+      (ui.qscan ? '<form class="stack" data-submit="takeq"><label class="field"><span>ชื่อที่ใช้เรียกคิว</span>' + inp(ui, 'qname', 'placeholder="เช่น คุณมินะ"') + '</label><div class="field"><span>จำนวนคน</span>' + stepper('qpeople', 'x', ui.qpeople, 'จำนวนคน') + '</div><button class="btn primary">' + ic('ticket') + 'รับหมายเลขคิว</button></form>'
+        : '<p class="muted">คิวปัจจุบันรอ <b>' + waiting + '</b> กลุ่ม · ประมาณ <b>' + waiting * 4 + '</b> นาที</p>' + btn('สแกน QR เพื่อรับคิว', 'qscan', null, 'primary', 'qr')) + '</div></div></div>';
+  } else if (q.status === 'seated') {
+    left = '<div class="card stack"><div class="ticket"><span class="pill ok">' + ic('check') + 'จัดโต๊ะให้แล้ว</span><div class="lbl" style="margin-top:10px">คิว ' + q.no + ' · โต๊ะของคุณ</div><div class="big">T' + q.tableId + '</div><div class="perf"></div><p class="muted">นั่งที่โต๊ะ แล้วสแกน QR บนโต๊ะเพื่อดูเมนูและสั่งอาหาร</p></div>' + btn('ไปสั่งอาหาร', 'goorder', null, 'primary block', 'utensils') + '</div>';
+  } else {
+    const ahead = queueAhead(q.no), pos0 = q.ahead0 == null ? (q.ahead0 = Math.max(ahead, 1)) : q.ahead0, pct = q.status === 'called' ? 100 : Math.round((1 - ahead / Math.max(pos0, 1)) * 100);
+    left = '<div class="card stack"><div class="ticket"><div class="row between"><span class="pill ' + (q.status === 'called' ? 'ok' : 'info') + '">' + (q.status === 'called' ? 'ถึงคิวแล้ว' : 'กำลังรอคิว') + '</span><span class="hint"><span class="ring" title="ข้อมูลอัปเดตทุก 5 วินาที"></span> อัปเดตทุก 5 วินาที</span></div>' +
+      '<div class="lbl" style="margin-top:10px">หมายเลขคิวของคุณ · ' + esc(q.name) + ' · ' + q.people + ' คน</div><div class="big">' + q.no + '</div><div class="perf"></div>' +
+      (q.status === 'called' ? '<div class="row between"><div><div class="lbl">กรุณามาที่หน้าร้านภายใน</div><div class="bigclock" data-t0="' + q.calledAt + '" data-dur="' + QUEUE_NOSHOW_MS + '" data-mode="down">' + mmss(q.calledAt + QUEUE_NOSHOW_MS - Clock.now()) + '</div></div><span class="hint">เกินเวลา ระบบข้ามไปคิวถัดไป</span></div>'
+        : '<div class="row between"><div><div class="lbl">คิวก่อนหน้า</div><b class="num" style="font-size:28px;font-family:var(--f-disp)">' + ahead + '</b></div><div><div class="lbl">เวลารอโดยประมาณ</div><b class="num" style="font-size:28px;font-family:var(--f-disp)">' + ahead * 4 + ' นาที</b></div></div><div class="waitbar" style="margin-top:12px"><i style="width:' + pct + '%"></i></div>') +
+      '</div>' + (q.status === 'waiting' && ahead <= 2 ? msg('warn', '<b>ใกล้ถึงคิวแล้ว!</b> เหลืออีก ' + ahead + ' คิว กรุณาเตรียมตัวมาที่หน้าร้าน', 'bell') : '') +
+      (q.status === 'called' ? msg('ok', 'พนักงานเรียกคิวของคุณแล้ว ไปที่เคาน์เตอร์เพื่อจัดโต๊ะ') : '') + '</div>';
+  }
+  const board = '<div class="card stack"><h3>จอคิวหน้าร้าน</h3><div class="row" style="gap:20px"><div><div class="lbl">กำลังเรียก</div><div class="big" style="font:800 44px var(--f-disp);color:var(--shu)">' + (serving ? serving.no : '—') + '</div></div><div><div class="lbl">รอคิว</div><div style="font:800 44px var(--f-disp)">' + waiting + '</div></div></div><hr class="div">' +
+    (S.queue.list.filter(x => x.status === 'waiting').slice(0, 6).map(x => '<div class="row between"><span><b class="num">' + x.no + '</b> <span class="muted">' + esc(x.name) + (x.mine ? ' (คุณ)' : '') + '</span></span><span class="hint">' + x.people + ' คน</span></div>').join('') || '<p class="hint">ไม่มีคิวรอ</p>') + '</div>';
+  return '<div class="view cols2 w21">' + left + board + '</div>';
+}
+
+/* ---------- customer: order ---------- */
+function scanCard(p) {
+  const c = S.cust, ui = p.ui;
+  const cards = S.tables.map(t => { const ok = t.status === 'occupied' && !t.claimed, mineT = c.seated === t.id; return '<button type="button" class="tbl ' + t.status + (mineT ? ' pick' : '') + '" data-act="scantable" data-arg="' + t.id + '" ' + (ok ? '' : 'disabled') + '><span class="tn">T' + t.id + '</span><span class="seat">' + t.seats + ' ที่นั่ง</span>' + pill(ok ? 'ok' : 'warn', ok ? (mineT ? 'โต๊ะของคุณ · แตะเพื่อสแกน' : 'แตะเพื่อสแกน') : t.status === 'occupied' ? 'มีผู้ใช้แล้ว' : TABLE_STATUS[t.status].label) + '</button>'; }).join('');
+  return '<div class="view stack"><div class="card stack"><div><h3>ขั้นที่ 1: สแกน QR ที่โต๊ะ</h3><p class="hint">ลูกค้านั่งโต๊ะที่พนักงานจัดให้ แล้วสแกน QR ที่โต๊ะ เลือกโต๊ะด้านล่างเพื่อจำลองการสแกน (เฉพาะโต๊ะที่มีลูกค้าและยังไม่มีใครสั่ง)</p></div>' +
+    (c.seated ? msg('ok', 'พนักงานจัดโต๊ะ <b>T' + c.seated + '</b> ให้คุณแล้ว') : msg('info', 'ยังไม่มีโต๊ะ: รับคิวหรือจองโต๊ะแล้วให้พนักงานจัดโต๊ะ หรือกดปุ่มเดโมด้านล่างเพื่อข้ามขั้นตอน')) +
+    '<div class="floor">' + cards + '</div><div class="row">' + btn('เดโม: ให้พนักงานจัดโต๊ะให้ทันที', 'quickseat', null, '', 'wand') + '<span class="hint">ใช้เมื่ออยากข้ามไปทดลองสั่งอาหาร</span></div></div></div>';
+}
+
+function dishCard(m, ui) {
+  const sold = !avail(m), q = cartQty(m.id);
+  return '<article class="dish ' + (sold ? 'sold' : '') + '"><div class="pic">' + art(m.art) + '<span class="ja">' + m.ja + '</span>' + (m.tag && !sold ? '<span class="tag pill gold">' + ic('star') + m.tag + '</span>' : '') + '</div><div class="body">' +
+    '<h4>' + esc(m.name) + (m.spicy ? ' <span class="spicy" aria-label="เผ็ด">' + '🌶'.repeat(m.spicy) + '</span>' : '') + '</h4><p class="desc">' + esc(m.desc) + '</p>' +
+    '<div class="alls" aria-label="สารก่อภูมิแพ้">' + (m.all.length ? m.all.map(a => '<span class="a">' + a + '</span>').join('') : '<span class="a">ไม่มีสารก่อภูมิแพ้หลัก</span>') + '</div>' +
+    '<div class="foot"><div><span class="price">' + baht(m.price) + '</span>' + (!sold && m.stock <= 5 ? '<div class="stockleft">เหลือ ' + m.stock + ' ที่</div>' : '') + (sold && m.closed ? '<div class="stockleft">' + esc(m.closedReason) + '</div>' : '') + '</div>' +
+    (sold ? '<button class="btn sm" disabled>หมด</button>' : q ? stepper('cartqty', m.id, q, 'จำนวน ' + m.name) : btn('เพิ่ม', 'add', m.id, 'sm primary', 'plus')) + '</div></div></article>';
+}
+
+function menuView(p) {
+  const ui = p.ui, c = S.cust, q = (ui.q || '').trim().toLowerCase(), cat = ui.cat || 'all', avoid = ui.avoid || [];
+  const base = S.menu.filter(m => (cat === 'all' || m.cat === cat) && (!q || (m.name + ' ' + m.ja + ' ' + m.desc).toLowerCase().indexOf(q) >= 0));
+  const items = base.filter(m => !avoid.some(a => m.all.indexOf(a) >= 0)), hidden = base.length - items.length;
+  const cats = '<div class="catbar" role="group" aria-label="หมวดอาหาร"><button class="cat" aria-pressed="' + (cat === 'all') + '" data-act="cat" data-arg="all">ทั้งหมด</button>' + CATS.map(k => '<button class="cat" aria-pressed="' + (cat === k.id) + '" data-act="cat" data-arg="' + k.id + '">' + k.name + '<small>' + k.ja + '</small></button>').join('') + '</div>';
+  const filt = '<div class="filters"><div class="searchbox">' + ic('search') + '<input class="in" type="search" data-bind="q" data-rr="1" value="' + esc(ui.q || '') + '" placeholder="ค้นหาเมนู เช่น แซลมอน, ราเม็ง" aria-label="ค้นหาเมนู"></div></div>' +
+    '<div class="filters"><span class="lbl">แพ้อะไรไหม? ซ่อนเมนูที่มี:' + uc('UC-03') + '</span>' + ALLERGENS.map(a => '<button type="button" class="chk" aria-pressed="' + (avoid.indexOf(a) >= 0) + '" data-act="alg" data-arg="' + a + '">' + a + '</button>').join('') + '</div>';
+  const cnt = cartCount();
+  return '<div class="view stack"><div class="row between"><div><h2 style="font-size:20px">โต๊ะ T' + c.tableId + '</h2><p class="hint">สวัสดี ' + esc(custName()) + (c.auth && c.auth.type === 'guest' ? ' (Guest)' : '') + ' · เมนูทั้งหมด ' + S.menu.length + ' รายการ' + uc('UC-03') + '</p></div>' +
+    '<div class="seg" role="group"><button type="button" aria-pressed="' + (ui.osub !== 'orders') + '" data-act="osub" data-arg="menu">เมนู</button><button type="button" aria-pressed="' + (ui.osub === 'orders') + '" data-act="osub" data-arg="orders">ออเดอร์ของฉัน (' + S.orders.filter(o => o.mine && o.tableId === c.tableId).length + ')</button></div></div>' +
+    (ui.osub === 'orders' ? ordersView(p) : cats + filt + (hidden ? '<p class="hint">ซ่อน ' + hidden + ' เมนูที่มีสารที่คุณเลือกหลีกเลี่ยง</p>' : '') +
+      (items.length ? '<div class="menu-grid">' + items.map(m => dishCard(m, ui)).join('') + '</div>' : emptyBox('ไม่พบเมนูที่ตรงกับเงื่อนไข', 'ลองล้างคำค้นหาหรือปลดตัวกรองสารก่อภูมิแพ้')) +
+      '<div class="carttab"><button class="btn primary ' + (ui.bump ? 'bump' : '') + '" data-act="cart" ' + (cnt ? '' : 'disabled') + '>' + ic('cart') + 'ตะกร้า · ' + cnt + ' รายการ · ' + baht(cartTotal()) + '</button></div>') + '</div>';
+}
+
+function cartSheet(p) {
+  const ui = p.ui, c = S.cust, lines = c.cart.map(l => { const m = menuItem(l.id); return '<div class="line"><div class="thumb">' + art(m.art) + '</div><div><div class="nm">' + esc(m.name) + '</div><div class="hint num">' + baht(m.price) + ' × ' + l.qty + '</div>' +
+    '<input class="in" style="margin-top:6px;min-height:36px;padding:6px 10px;font-size:13.5px" data-bind="note:' + l.id + '" value="' + esc(l.note) + '" placeholder="คำขอพิเศษ เช่น ไม่ใส่วาซาบิ" aria-label="คำขอพิเศษ ' + esc(m.name) + '"></div><div style="text-align:right"><b class="num">' + baht(m.price * l.qty) + '</b><div style="margin-top:6px">' + stepper('cartqty', l.id, l.qty, 'จำนวน') + '</div></div></div>'; }).join('');
+  return '<div class="sheet-wrap" data-act="cartclose"><div class="sheet" role="dialog" aria-label="ตะกร้า" data-stop="1"><header><h3>ตะกร้าของฉัน' + uc('UC-04') + '</h3><button class="iconbtn" data-act="cartclose" aria-label="ปิด">' + ic('x') + '</button></header><div class="sbody">' +
+    (lines || emptyBox('ตะกร้าว่าง')) + (ui.cartIssues && ui.cartIssues.length ? msg('err', ui.cartIssues.map(esc).join('<br>')) : '') + '</div><footer><div class="total"><span>ยอดรวม (รวม VAT 7%)</span><b>' + baht(cartTotal()) + '</b></div>' +
+    '<button class="btn primary block" data-act="confirm" ' + (c.cart.length ? '' : 'disabled') + '>' + ic('check') + 'ยืนยันสั่งอาหาร</button><p class="hint">ระบบสร้างออเดอร์ ตัดสต็อก และส่งไปหน้าจอครัวภายใน 3 วินาที' + uc('UC-13') + '</p></footer></div></div>';
+}
+
+function ordersView(p) {
+  const c = S.cust, os = S.orders.filter(o => o.mine && o.tableId === c.tableId).sort((a, b) => b.id - a.id), recalc = S.recalcUntil > Date.now();
+  const total = tableTotal(c.tableId);
+  const head = '<div class="card row between"><div><div class="lbl">ยอดรวมโต๊ะนี้ (ไม่รวมรายการที่ยกเลิก)</div>' + (recalc ? '<div class="row"><span class="spin"></span><b>กำลังคืนสต็อกและคำนวณยอดใหม่…</b><span class="hint">ภายใน 2 วินาที' + uc('UC-16') + '</span></div>' : '<b class="num" style="font:800 28px var(--f-disp)">' + baht(total) + '</b>') + '</div><div class="row">' + btn('สั่งเพิ่ม', 'osub', 'menu', '', 'plus') + btn('เรียกพนักงาน', 'callstaff', null, '', 'bell') + btn('ขอเช็คบิล', 'gobill', null, 'primary', 'receipt') + '</div></div>';
+  const cards = os.map(o => {
+    const st = ORDER_STATUS[o.status], items = '<ul>' + o.items.map(i => '<li><span class="nm">' + i.qty + '× ' + esc(i.name) + (i.note ? '<small>คำขอ: ' + esc(i.note) + '</small>' : '') + '</span><span class="num">' + baht(i.price * i.qty) + '</span></li>').join('') + '</ul>';
+    let mid = '';
+    if (o.status === 'sending') mid = '<div class="progress" role="progressbar" aria-label="กำลังส่งไปครัว"><i></i></div><p class="hint">กำลังส่งไปครัว… (เป้าหมายไม่เกิน 3 วินาที)</p>';
+    else if (o.status === 'send_failed') mid = msg('err', '<b>ส่งไม่สำเร็จ</b> ระบบเก็บออเดอร์ไว้ ลองส่งใหม่อัตโนมัติ และแจ้งพนักงานแล้ว') + '<div class="row">' + btn('ลองส่งใหม่เดี๋ยวนี้', 'retry', o.id, 'sm', 'refresh') + btn('เรียกพนักงาน', 'callstaff', null, 'sm', 'bell') + '</div>';
+    else if (o.status !== 'cancelled') mid = timeline(o.status) + (o.sendMs ? '<p class="hint">ส่งถึงครัวใน ' + (o.sendMs / 1000).toFixed(1) + ' วินาที</p>' : '');
+    return '<div class="ord ' + o.status + '"><div class="row between"><b>ออเดอร์ #' + o.id + ' <span class="hint">' + hhmm(o.createdAt) + ' น.</span></b>' + pill(st.kind, st.label) + '</div>' + mid + items +
+      '<div class="row between"><b class="num">' + baht(orderTotal(o)) + '</b>' + (CANCELLABLE.indexOf(o.status) >= 0 ? btn('ยกเลิกออเดอร์', 'cancel', o.id, 'sm danger', 'x') : '<span class="hint">' + (o.status === 'cooking' || o.status === 'ready' ? 'เริ่มปรุงแล้ว ยกเลิกไม่ได้' : '') + '</span>') + '</div></div>';
+  }).join('');
+  return '<div class="stack">' + head + (cards || emptyBox('ยังไม่มีออเดอร์', 'เลือกเมนูแล้วกดยืนยันสั่งอาหาร')) + '</div>';
+}
+
+function cOrder(p) {
+  const c = S.cust, ui = p.ui;
+  if (!c.tableId) return scanCard(p);
+  if (!c.auth) return '<div class="view stack"><div class="msg info">' + ic('info') + '<div>โต๊ะ <b>T' + c.tableId + '</b> · สมาชิกเข้าสู่ระบบ หรือใช้งานแบบ Guest ได้</div></div>' + loginCard(p, 'customer', { guest: true, sub: 'สมาชิกเข้าสู่ระบบเพื่อรับสิทธิ์ของสมาชิก' }) + '</div>';
+  if (ui.cartOpen) p.overlay = cartSheet(p);
+  return menuView(p);
+}
+
+/* ---------- customer: bill (UC-08, UC-11) ---------- */
+function receiptView(r) {
+  const items = aggItems(r.orders);
+  return '<div class="view stack"><div class="receipt"><div style="text-align:center"><h3 style="letter-spacing:.2em">' + BRAND.name + '</h3><div class="hint">' + BRAND.kanji + ' · ใบเสร็จรับเงิน (ตัวอย่าง)</div></div><hr class="div">' +
+    '<div class="rl"><span>เลขที่</span><b>' + r.no + '</b></div><div class="rl"><span>โต๊ะ</span><b>T' + r.tid + '</b></div><div class="rl"><span>วันเวลา</span><b>' + thDate(isoDate(r.at)) + ' ' + hhmm(r.at) + '</b></div><hr class="div">' +
+    items.map(i => '<div class="rl"><span>' + i.qty + '× ' + esc(i.name) + '</span><span>' + baht(i.price * i.qty) + '</span></div>').join('') + '<hr class="div">' +
+    '<div class="rl"><span>ภาษีมูลค่าเพิ่ม 7% (รวมในราคาแล้ว)</span><span>' + baht(vatOf(r.total)) + '</span></div><div class="rl" style="font-size:20px;font-weight:800"><span>รวมทั้งสิ้น</span><span>' + baht(r.total) + '</span></div><hr class="div">' +
+    r.parts.map((p, i) => '<div class="rl"><span>บิล ' + (i + 1) + '/' + r.parts.length + ' · ' + PAY_LABEL[p.method] + '</span><span>' + baht(p.amount) + '</span></div>').join('') + '<div class="stamp">ชำระแล้ว</div><p class="hint" style="text-align:center;margin-top:14px">ขอบคุณที่ใช้บริการ ありがとうございました</p></div>' +
+    '<div class="row" style="justify-content:center">' + btn('เสร็จสิ้น เริ่มใช้งานใหม่', 'newvisit', null, 'primary', 'refresh') + '</div></div>';
+}
+function cBill(p) {
+  const c = S.cust, ui = p.ui;
+  if (c.receipt) return receiptView(c.receipt);
+  if (!c.tableId) return '<div class="view">' + emptyBox('ยังไม่มีโต๊ะที่ใช้งาน', 'สั่งอาหารที่โต๊ะก่อน แล้วกลับมาเช็คบิลที่นี่') + '</div>';
+  const tid = c.tableId, b = S.bills[tid], os = tableOrders(tid), total = tableTotal(tid), unserved = os.filter(o => o.status !== 'served').length;
+  if (S.recalcUntil > Date.now() && !b) return '<div class="view"><div class="card row"><span class="spin"></span><b>กำลังคำนวณยอดใหม่…</b></div></div>';
+  if (!b) {
+    const items = aggItems(os);
+    return '<div class="view cols2 w21"><div class="card stack"><div><h3>สรุปยอดโต๊ะ T' + tid + uc('UC-08') + '</h3><p class="hint">ตรวจรายการก่อนชำระ</p></div>' +
+      (items.length ? items.map(i => '<div class="row between"><span>' + i.qty + '× ' + esc(i.name) + '</span><b class="num">' + baht(i.price * i.qty) + '</b></div>').join('') : emptyBox('ยังไม่มีรายการสั่ง')) +
+      (unserved ? msg('warn', 'ยังมี ' + unserved + ' ออเดอร์ที่ยังไม่เสิร์ฟ') : '') + '<hr class="div"><div class="total"><span>ยอดรวม</span><b>' + baht(total) + '</b></div><div class="hint">รวมภาษีมูลค่าเพิ่ม 7% แล้ว (ภาษี ' + baht(vatOf(total)) + ')</div></div>' +
+      '<div class="card stack"><h3>แยกบิล</h3><div class="field"><span>จำนวนบิลที่ต้องการแยก (หารเท่ากัน)</span>' + stepper('split', 'x', ui.split, 'จำนวนบิล') + '</div><p class="muted">บิลละประมาณ <b class="num">' + baht(Math.ceil(total / ui.split)) + '</b></p>' + btn('ยืนยันเช็คบิล', 'openbill', null, 'primary block', 'receipt', total ? '' : 'disabled') + '</div></div>';
+  }
+  const firstUnpaid = b.parts.findIndex(x => x.status !== 'paid'), idx = ui.payIdx != null && b.parts[ui.payIdx] && b.parts[ui.payIdx].status !== 'paid' ? ui.payIdx : firstUnpaid, part = b.parts[idx];
+  const list = '<div class="card stack"><div class="row between"><h3>ยอดที่ต้องชำระ ' + baht(b.total) + '</h3>' + pill('info', 'แยก ' + b.n + ' บิล') + '</div>' + b.parts.map((x, i) => '<div class="row between" style="padding:8px 0;border-bottom:1px dashed var(--line)"><div><b>บิลที่ ' + (i + 1) + '/' + b.n + '</b> <span class="num">' + baht(x.amount) + '</span></div>' + (x.status === 'paid' ? pill('ok', 'ชำระแล้ว · ' + PAY_LABEL[x.method], 'check') : x.status === 'cash_wait' ? pill('warn', 'รอพนักงานรับเงินสด') : x.status === 'checking' ? pill('info', 'กำลังตรวจสอบ…') : i === idx ? pill('shu', 'กำลังชำระ') : pill('', 'รอชำระ')) + '</div>').join('') + '</div>';
+  let pay = '';
+  if (part) {
+    const pm = ui.pm || null, sw = part.status;
+    const methods = '<div class="paymethods">' + [['cash', 'cash', 'เงินสด', 'ชำระที่โต๊ะกับพนักงาน'], ['qr', 'qr', 'สแกนจ่าย', 'PromptPay QR'], ['transfer', 'slip', 'โอนพร้อมสลิป', 'แนบสลิปให้ระบบตรวจ']].map(m => '<button type="button" class="pm" aria-pressed="' + (pm === m[0]) + '" data-act="pm" data-arg="' + m[0] + '" ' + (sw === 'unpaid' ? '' : 'disabled') + '>' + ic(m[1]) + '<b>' + m[2] + '</b><small>' + m[3] + '</small></button>').join('') + '</div>';
+    let det = '';
+    if (sw === 'cash_wait') det = msg('warn', '<b>แจ้งพนักงานแล้ว</b> รอพนักงานมารับเงินสด ' + baht(part.amount)) + '<p class="hint">เปิดหน้า "พนักงาน" แล้วกดรับเงินสดเพื่อดูการทำงานต่อเนื่อง</p>';
+    else if (sw === 'checking') det = '<div class="row"><span class="spin"></span><b>ระบบกำลังตรวจสอบการชำระ…</b></div>';
+    else if (pm === 'cash') det = '<p class="muted">ชำระเงินสด ' + baht(part.amount) + ' กับพนักงานที่โต๊ะ</p>' + btn('แจ้งชำระเงินสด', 'paycash', null, 'primary', 'cash');
+    else if (pm === 'qr') det = '<div class="row" style="gap:18px;align-items:flex-start">' + qrSVG('PROMPTPAY-' + tid + '-' + idx + '-' + part.amount, 'PromptPay QR ตัวอย่าง') + '<div class="stack" style="flex:1 1 200px"><div class="lbl">ยอดชำระ</div><b class="num" style="font:800 30px var(--f-disp)">' + baht(part.amount) + '</b><p class="hint">QR ตัวอย่างสำหรับเดโม สแกนจริงไม่ได้ กดปุ่มด้านล่างเพื่อจำลองว่าชำระแล้ว</p>' + btn('ฉันสแกนจ่ายแล้ว', 'payqr', null, 'primary', 'check') + '</div></div>';
+    else if (pm === 'transfer') det = '<div class="stack"><p class="muted">โอนเข้าบัญชีตัวอย่าง <span class="code">123-4-56789-0</span> · ' + BRAND.name + ' · ยอด <b class="num">' + baht(part.amount) + '</b></p><div class="slipbox">' + (ui.slipData ? '<img src="' + ui.slipData + '" alt="สลิปที่แนบ">' : ic('upload')) + '<div>' + (ui.slipName ? '<b>' + esc(ui.slipName) + '</b>' : 'แนบรูปสลิป (ไฟล์ภาพ)') + '</div><div class="row" style="justify-content:center"><label class="btn sm" for="slipfile">' + ic('upload') + 'เลือกไฟล์</label><input type="file" id="slipfile" accept="image/*" hidden>' + btn('ใช้สลิปตัวอย่าง', 'sampleslip', null, 'sm', 'slip') + '</div></div>' +
+      '<div class="field"><span>ผลตรวจสลิป (ตั้งค่าสำหรับเดโม)' + uc('UC-11') + '</span><div class="radios">' + [['ok', 'ถูกต้อง'], ['dup', 'สลิปซ้ำ'], ['mismatch', 'ยอดไม่ตรง']].map(r => '<label><input type="radio" name="slipmode-' + p.id + '" data-bind="slipMode" data-rr="1" value="' + r[0] + '" ' + ((ui.slipMode || 'ok') === r[0] ? 'checked' : '') + '><span>' + r[1] + '</span></label>').join('') + '</div></div>' +
+      (ui.slipRes && ui.slipRes !== 'ok' ? msg('err', ui.slipRes === 'dup' ? '<b>สลิปนี้ถูกใช้ไปแล้ว</b> กรุณาชำระใหม่' : '<b>ยอดในสลิปไม่ตรงกับยอดที่ต้องชำระ</b> กรุณาชำระใหม่') : '') +
+      btn('ส่งสลิปให้ระบบตรวจ', 'payslip', null, 'primary', 'check', ui.slipName ? '' : 'disabled') + '</div>';
+    else det = '<p class="hint">เลือกวิธีชำระเงินด้านบน</p>';
+    pay = '<div class="card stack"><h3>ชำระบิลที่ ' + (idx + 1) + '/' + b.n + ' · ' + baht(part.amount) + '</h3>' + methods + det + '</div>';
+  }
+  return '<div class="view cols2">' + list + pay + '</div>';
+}
+
+VIEWS.customer = function (p) {
+  const c = S.cust, ui = p.ui, tab = ui.ctab || 'book';
+  const tabs = [{ id: 'book', label: 'จองโต๊ะ', icon: 'table' }, { id: 'queue', label: 'รับคิว', icon: 'ticket', badge: (() => { const q = c.queueNo && S.queue.list.find(x => x.no === c.queueNo); return q && q.status === 'called' ? '!' : null; })() },
+    { id: 'order', label: 'สั่งอาหาร', icon: 'utensils', badge: cartCount() || null }, { id: 'bill', label: 'เช็คบิล', icon: 'receipt', badge: S.bills[c.tableId] ? '!' : null }];
+  const body = tab === 'book' ? cBook(p) : tab === 'queue' ? cQueue(p) : tab === 'order' ? cOrder(p) : cBill(p);
+  return { tabs, tab, key: 'ctab', body };
+};
+
+/* ===== views_staff.js : staff + kitchen ===== */
+const itemsHtml = (o, withAll) => '<ul>' + o.items.map(i => '<li><span class="q">' + i.qty + '×</span><span>' + esc(i.name) + (i.note ? '<div class="note">คำขอพิเศษ: ' + esc(i.note) + '</div>' : '') + (withAll && i.all.length ? '<div class="allw">มี: ' + i.all.join(', ') + '</div>' : '') + '</span></li>').join('') + '</ul>';
+const logHtml = n => '<div class="log">' + S.log.slice(0, n).map(l => '<div><time>' + hhmm(l.at) + '</time><span class="pill">' + ({ customer: 'ลูกค้า', staff: 'พนักงาน', kitchen: 'ครัว', owner: 'เจ้าของ', system: 'ระบบ' }[l.role] || l.role) + '</span><span>' + esc(l.text) + '</span></div>').join('') + '</div>';
+
+function staffWork(p) {
+  const ready = S.orders.filter(o => o.status === 'ready').sort((a, b) => a.readyAt - b.readyAt);
+  const failed = S.orders.filter(o => o.status === 'send_failed');
+  const cash = []; Object.keys(S.bills).forEach(t => S.bills[t].parts.forEach((x, i) => { if (x.status === 'cash_wait') cash.push({ t: +t, i, amount: x.amount }); }));
+  const calls = S.calls.filter(c => !c.done);
+  const cr = ready.map(o => '<div class="tkt ready"><div class="hd"><span class="tid">T' + o.tableId + '</span><span class="hint">ออเดอร์ #' + o.id + ' · รอมา <b class="clk num" data-t0="' + o.readyAt + '" data-warn="180000">' + mmss(Clock.now() - o.readyAt) + '</b></span></div>' + itemsHtml(o) + '<div class="row">' + btn('เสิร์ฟแล้ว', 'serve', o.id, 'sm ok', 'check') + '</div></div>').join('');
+  const tasks = failed.map(o => '<div class="msg err">' + ic('alert') + '<div><b>ออเดอร์ #' + o.id + ' โต๊ะ T' + o.tableId + '</b> ส่งครัวไม่สำเร็จ (ระบบเก็บไว้และลองใหม่อัตโนมัติ)<div class="row" style="margin-top:6px">' + btn('ส่งซ้ำ', 'retry', o.id, 'sm', 'refresh') + '</div></div></div>').join('') +
+    cash.map(c => '<div class="msg warn">' + ic('cash') + '<div><b>โต๊ะ T' + c.t + '</b> ขอชำระเงินสด <b>' + baht(c.amount) + '</b><div class="row" style="margin-top:6px">' + btn('รับเงินสดแล้ว', 'cashok', c.t + ':' + c.i, 'sm ok', 'check') + '</div></div></div>').join('') +
+    calls.map(c => '<div class="msg info">' + ic('bell') + '<div><b>โต๊ะ T' + c.tid + '</b> เรียกพนักงาน · ' + hhmm(c.at) + '<div class="row" style="margin-top:6px">' + btn('รับทราบ', 'calldone', c.id, 'sm', 'check') + '</div></div></div>').join('');
+  return '<div class="view cols2"><div class="stack"><div class="sec-title"><h2>รอเสิร์ฟ</h2><p>' + ready.length + ' ออเดอร์ · เมื่อครัวกด "พร้อมเสิร์ฟ" จะแจ้งที่นี่</p></div>' + (cr || emptyBox('ไม่มีอาหารรอเสิร์ฟ')) + '</div>' +
+    '<div class="stack"><div class="sec-title"><h2>งานที่ต้องจัดการ</h2></div>' + (tasks || emptyBox('ไม่มีงานค้าง')) + '<div class="card"><h3>กิจกรรมล่าสุด</h3>' + logHtml(8) + '</div></div></div>';
+}
+
+function staffQueue(p) {
+  const ui = p.ui, today = isoDate(Clock.now());
+  const called = S.queue.list.filter(q => q.status === 'called'), waiting = S.queue.list.filter(q => q.status === 'waiting');
+  const calledHtml = called.map(q => '<div class="msg ok" style="display:block"><div class="row between"><div><b style="font:800 26px var(--f-disp)">' + q.no + '</b> <span class="muted">' + esc(q.name) + ' · ' + q.people + ' คน</span></div><div class="hint">รอลูกค้า <b class="bigclock num" style="font-size:22px" data-t0="' + q.calledAt + '" data-dur="' + QUEUE_NOSHOW_MS + '" data-mode="down">' + mmss(q.calledAt + QUEUE_NOSHOW_MS - Clock.now()) + '</b></div></div><div class="row" style="margin-top:8px">' + btn('มาถึงแล้ว · จัดโต๊ะ', 'seatq', q.no, 'sm ok', 'table') + btn('ข้ามคิว', 'skipq', q.no, 'sm danger', 'x') + '<span class="hint">ไม่มาภายใน 10 นาที ระบบข้ามอัตโนมัติ</span></div></div>').join('');
+  const qcard = '<div class="card stack"><div class="row between"><div><h3>คิวหน้าร้าน' + uc('UC-09') + '</h3><p class="hint">รอ ' + waiting.length + ' กลุ่ม</p></div>' + btn('เรียกคิวถัดไป', 'callq', null, 'primary', 'bell', waiting.length ? '' : 'disabled') + '</div>' + calledHtml +
+    (waiting.length ? '<div class="tscroll"><table class="t"><thead><tr><th>คิว</th><th>ชื่อ</th><th>คน</th><th>รอมา</th></tr></thead><tbody>' + waiting.map(q => '<tr><td><b class="num">' + q.no + '</b>' + (q.mine ? ' ' + pill('shu', 'ลูกค้าเดโม') : '') + '</td><td>' + esc(q.name) + '</td><td>' + q.people + '</td><td class="num">' + mmss(Clock.now() - q.at) + '</td></tr>').join('') + '</tbody></table></div>' : emptyBox('ไม่มีคิวรอ')) + '</div>';
+  const bs = S.bookings.filter(b => b.date >= today && b.status !== 'cancelled').sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  const bcard = '<div class="card stack"><div><h3>รายการจอง' + uc('UC-07') + '</h3><p class="hint">ลูกค้าแสดงเลขที่การจอง พนักงานกดยืนยันการมาถึง</p></div>' + (bs.length ? '<div class="tscroll"><table class="t"><thead><tr><th>เลขที่</th><th>ผู้จอง</th><th>เวลา</th><th>โต๊ะ</th><th></th></tr></thead><tbody>' + bs.map(b => '<tr><td><b class="num">' + b.no + '</b></td><td>' + esc(b.name) + '<div class="hint">' + b.people + ' คน</div></td><td class="num">' + (b.date === today ? 'วันนี้' : thDate(b.date)) + '<br>' + b.time + '</td><td>T' + b.tableId + '</td><td>' + (b.status === 'booked' ? btn('มาถึงแล้ว', 'arrive', b.no, 'sm', 'check') : pill(b.status === 'arrived' ? 'ok' : '', b.status === 'arrived' ? 'นั่งโต๊ะ T' + b.seatedTable : 'ไม่มา')) + '</td></tr>').join('') + '</tbody></table></div>' : emptyBox('ไม่มีรายการจอง')) + '</div>';
+  if (ui.seat) {
+    const q = S.queue.list.find(x => x.no === ui.seat);
+    if (q) {
+      const fits = freeTablesFor(q.people), others = S.tables.filter(t => t.status === 'free' && t.seats < q.people);
+      p.overlay = '<div class="sheet-wrap" data-act="seatclose"><div class="sheet" data-stop="1" role="dialog" aria-label="จัดโต๊ะ"><header><h3>จัดโต๊ะให้คิว ' + q.no + uc('UC-10') + '</h3><button class="iconbtn" data-act="seatclose" aria-label="ปิด">' + ic('x') + '</button></header><div class="sbody"><p class="muted">' + esc(q.name) + ' · ' + q.people + ' คน · เลือกโต๊ะว่างที่นั่งพอ</p>' +
+        (fits.length ? '<div class="floor">' + fits.map(t => '<button class="tbl free" data-act="seatpick" data-arg="' + t.id + '"><span class="tn">T' + t.id + '</span><span class="seat">' + t.seats + ' ที่นั่ง</span>' + pill('ok', 'ว่าง') + '</button>').join('') + '</div>' : msg('warn', 'ไม่มีโต๊ะว่างที่นั่งพอ ลองเปลี่ยนสถานะโต๊ะที่ทำความสะอาดเสร็จเป็น "ว่าง" ในแท็บโต๊ะ')) +
+        (others.length ? '<p class="hint">โต๊ะว่างที่เล็กเกินไป: ' + others.map(t => 'T' + t.id + ' (' + t.seats + ')').join(', ') + '</p>' : '') + '</div></div></div>';
+    }
+  }
+  return '<div class="view cols2">' + qcard + bcard + '</div>';
+}
+
+function staffTables(p) {
+  const today = isoDate(Clock.now());
+  return '<div class="view stack"><div class="sec-title"><h2>ผังโต๊ะ' + uc('UC-10') + '</h2><p>เปลี่ยนสถานะโต๊ะได้ทันที ระบบจะเปลี่ยนเป็น "ว่าง" เองเมื่อชำระเงินครบ</p></div><div class="floor">' +
+    S.tables.map(t => { const os = tableOrders(t.id), bk = S.bookings.filter(b => b.date === today && b.status === 'booked' && b.tableId === t.id).sort((a, b) => a.time.localeCompare(b.time))[0];
+      return '<div class="tbl ' + t.status + '"><div class="row between"><span class="tn">T' + t.id + '</span>' + pill(t.status === 'free' ? 'ok' : t.status === 'occupied' ? 'shu' : t.status === 'cleaning' ? 'info' : 'gold', TABLE_STATUS[t.status].label) + '</div><div class="seat">' + t.seats + ' ที่นั่ง</div>' +
+        (os.length ? '<div class="hint">' + os.length + ' ออเดอร์ · <b class="num">' + baht(tableTotal(t.id)) + '</b></div>' : t.status === 'occupied' ? '<div class="hint">ยังไม่มีออเดอร์' + (t.claimed ? '' : ' · ยังไม่สแกน QR') + '</div>' : '') + (bk ? '<div class="hint">จอง ' + bk.time + ' · ' + esc(bk.name) + '</div>' : '') +
+        '<div class="row" style="gap:4px">' + ['free', 'occupied', 'cleaning'].filter(s => s !== t.status).map(s => '<button class="btn sm" data-act="tstatus" data-arg="' + t.id + ':' + s + '">' + TABLE_STATUS[s].label + '</button>').join('') + '</div></div>'; }).join('') + '</div></div>';
+}
+
+function staffMoney(p) {
+  const cash = []; Object.keys(S.bills).forEach(t => S.bills[t].parts.forEach((x, i) => { if (x.status === 'cash_wait') cash.push({ t: +t, i, amount: x.amount }); }));
+  const open = Object.keys(S.bills).map(t => ({ t: +t, b: S.bills[t] }));
+  return '<div class="view cols2"><div class="stack"><div class="card stack"><h3>รอรับเงินสด</h3>' + (cash.length ? cash.map(c => '<div class="row between"><span><b>โต๊ะ T' + c.t + '</b> · ' + baht(c.amount) + '</span>' + btn('รับเงินสดแล้ว', 'cashok', c.t + ':' + c.i, 'sm ok', 'check') + '</div>').join('') : '<p class="hint">ไม่มีรายการรอรับเงินสด</p>') + '</div>' +
+    '<div class="card stack"><h3>บิลที่เปิดอยู่</h3>' + (open.length ? open.map(o => '<div class="row between"><span><b>T' + o.t + '</b> · ' + baht(o.b.total) + ' · ' + o.b.parts.filter(x => x.status === 'paid').length + '/' + o.b.n + ' ชำระแล้ว</span></div>').join('') : '<p class="hint">ยังไม่มีบิลที่เปิด</p>') + '</div></div>' +
+    '<div class="card stack"><h3>การชำระล่าสุด' + uc('UC-11') + '</h3>' + (S.pays.length ? '<div class="tscroll"><table class="t"><thead><tr><th>เวลา</th><th>โต๊ะ</th><th>วิธี</th><th>ยอด</th></tr></thead><tbody>' + S.pays.slice().reverse().slice(0, 12).map(x => '<tr><td class="num">' + hhmm(x.at) + '</td><td>T' + x.tid + '</td><td>' + PAY_LABEL[x.method] + '</td><td class="num">' + baht(x.amount) + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="hint">ยังไม่มีการชำระในเซสชันนี้ ลองเช็คบิลจากฝั่งลูกค้า</p>') + '</div></div>';
+}
+
+VIEWS.staff = function (p) {
+  const ui = p.ui;
+  if (!S.auth.staff) return { tabs: null, body: '<div class="view">' + loginCard(p, 'staff', { sub: 'สำหรับพนักงานหน้าร้าน: เรียกคิว จัดโต๊ะ เสิร์ฟ รับชำระ' }) + '</div>' };
+  const tab = ui.stab || 'work', badge = S.orders.filter(o => o.status === 'ready').length + S.orders.filter(o => o.status === 'send_failed').length + S.calls.filter(c => !c.done).length;
+  const tabs = [{ id: 'work', label: 'งานตอนนี้', icon: 'bell', badge: badge || null }, { id: 'queue', label: 'คิว & จอง', icon: 'ticket', badge: S.queue.list.filter(q => q.status === 'called').length || null }, { id: 'tables', label: 'โต๊ะ', icon: 'table' }, { id: 'money', label: 'ชำระเงิน', icon: 'cash' }];
+  return { tabs, tab, key: 'stab', who: S.auth.staff.name, role: 'staff', body: tab === 'work' ? staffWork(p) : tab === 'queue' ? staffQueue(p) : tab === 'tables' ? staffTables(p) : staffMoney(p) };
+};
+
+/* ---------- kitchen (UC-12, UC-17) ---------- */
+function kdsBoard(p) {
+  const q = S.orders.filter(o => o.status === 'queued').sort((a, b) => a.sentAt - b.sentAt), cook = S.orders.filter(o => o.status === 'cooking').sort((a, b) => a.startedAt - b.startedAt), rdy = S.orders.filter(o => o.status === 'ready').sort((a, b) => a.readyAt - b.readyAt);
+  const tk = (o, kind) => { const t0 = kind === 'queued' ? o.sentAt : kind === 'cooking' ? o.startedAt : o.readyAt, old = kind === 'queued' && Clock.now() - o.sentAt > 600000;
+    return '<div class="tkt ' + kind + (old ? ' old' : '') + '"><div class="hd"><span class="tid">T' + o.tableId + '</span><span class="hint">#' + o.id + (kind === 'queued' ? ' · ' + (q.indexOf(o) + 1) + ' ในคิว' : '') + ' · <b class="clk num" data-t0="' + t0 + '" data-warn="' + (kind === 'cooking' ? 900000 : 600000) + '">' + mmss(Clock.now() - t0) + '</b></span></div>' + itemsHtml(o, true) +
+      '<div class="row">' + (kind === 'queued' ? btn('เริ่มปรุง', 'cook', o.id, 'sm primary', 'flame') : kind === 'cooking' ? btn('พร้อมเสิร์ฟ', 'ready', o.id, 'sm ok', 'check') : '<span class="pill ok">รอพนักงานมารับ</span>') + (o.mine ? pill('shu', 'ลูกค้าเดโม') : '') + '</div></div>'; };
+  const col = (title, arr, kind, sub) => '<div class="kcol"><h3>' + title + '<span class="pill">' + arr.length + '</span></h3>' + (sub ? '<p class="hint" style="padding:0 4px">' + sub + '</p>' : '') + (arr.length ? arr.map(o => tk(o, kind)).join('') : '<div class="empty" style="padding:16px">ไม่มีรายการ</div>') + '</div>';
+  return '<div class="view stack"><div class="row between"><div><h2 style="font-size:20px">หน้าจอครัว (KDS)' + uc('UC-12') + '</h2><p class="hint">เรียงตามลำดับก่อนหลัง (FIFO) · ใบสั่งรอเกิน 10 นาทีจะกรอบแดง</p></div><div class="row">' + btn('จำลองออเดอร์จากโต๊ะอื่น', 'mockorder', null, 'sm', 'plus') + '</div></div>' +
+    '<div class="kds">' + col('รอปรุง', q, 'queued', 'รับตามลำดับ ใบเก่าสุดอยู่บนสุด') + col('กำลังปรุง', cook, 'cooking') + col('พร้อมเสิร์ฟ', rdy, 'ready') + '</div></div>';
+}
+function kdsStock(p) {
+  const ui = p.ui, list = S.menu.slice().sort((a, b) => (avail(a) - avail(b)) || (a.stock - b.stock));
+  return '<div class="view stack"><div class="sec-title"><h2>วัตถุดิบ & เมนู' + uc('UC-17') + '</h2><p>วัตถุดิบหมด ปิดเมนูได้ทันที ลูกค้าจะเห็นเป็น "หมด" และเลือกใหม่</p></div><div class="card">' +
+    list.map(m => { const pct = Math.min(100, Math.round(m.stock / 40 * 100)); return '<div class="stk"><div><b>' + esc(m.name) + '</b> ' + (m.closed ? pill('bad', 'ปิดเมนู · ' + esc(m.closedReason)) : m.stock <= 0 ? pill('bad', 'หมดสต็อก') : m.stock <= 5 ? pill('warn', 'ใกล้หมด') : '') + '</div><div><div class="bar ' + (m.stock <= 0 ? 'zero' : m.stock <= 5 ? 'low' : '') + '"><i style="width:' + pct + '%"></i></div><div class="hint num">เหลือ ' + m.stock + ' ที่</div></div>' + (m.closed ? btn('เปิดเมนู', 'setopen', m.id, 'sm ok') : btn('วัตถุดิบหมด · ปิดเมนู', 'setclose', m.id, 'sm danger')) + '</div>'; }).join('') + '</div></div>';
+}
+VIEWS.kitchen = function (p) {
+  const ui = p.ui;
+  if (!S.auth.kitchen) return { tabs: null, body: '<div class="view">' + loginCard(p, 'kitchen', { sub: 'สำหรับพนักงานครัว: ดูใบสั่งและจัดการวัตถุดิบ' }) + '</div>' };
+  const tab = ui.ktab || 'board', n = S.orders.filter(o => o.status === 'queued').length;
+  const tabs = [{ id: 'board', label: 'ใบสั่งอาหาร', icon: 'flame', badge: n || null }, { id: 'stock', label: 'วัตถุดิบ & เมนู', icon: 'utensils', badge: S.menu.filter(m => !avail(m)).length || null }];
+  return { tabs, tab, key: 'ktab', who: S.auth.kitchen.name, role: 'kitchen', body: tab === 'board' ? kdsBoard(p) : kdsStock(p) };
+};
+
+/* ===== views_owner.js : home + owner dashboard ===== */
+const SRS_MAP = [
+  ['UC-01', 'ล็อกอิน', 'ลูกค้า/พนักงาน/ครัว/เจ้าของ · ล็อกบัญชี 5 นาที'], ['UC-03', 'ค้นหา & กรองสารก่อภูมิแพ้', 'ลูกค้า › สั่งอาหาร'], ['UC-04', 'ตะกร้า & ยืนยันสั่ง', 'ลูกค้า › สั่งอาหาร'],
+  ['UC-06', 'รับคิวด้วย QR', 'ลูกค้า › รับคิว'], ['UC-07', 'จองโต๊ะ', 'ลูกค้า › จองโต๊ะ'], ['UC-08', 'แสดงยอด/แยกบิล', 'ลูกค้า › เช็คบิล'], ['UC-09', 'เรียกคิว', 'พนักงาน › คิว & จอง'], ['UC-10', 'จัดการโต๊ะ', 'พนักงาน › โต๊ะ'],
+  ['UC-11', 'ตรวจสลิป', 'ลูกค้า › เช็คบิล (โอนพร้อมสลิป)'], ['UC-12', 'หน้าจอครัว FIFO', 'ครัว › ใบสั่งอาหาร'], ['UC-13', 'ส่งครัว ≤3 วินาที + ตัดสต็อก', 'ลูกค้า › ยืนยันสั่ง'], ['UC-16', 'ยกเลิกก่อนปรุง', 'ลูกค้า › ออเดอร์ของฉัน'], ['UC-17', 'ปิดเมนูเมื่อวัตถุดิบหมด', 'ครัว › วัตถุดิบ & เมนู']
+];
+
+VIEWS.home = function (p) {
+  let petals = ''; for (let i = 0; i < 14; i++) petals += '<i class="petal" style="left:' + (i * 7.3 + (i % 3) * 2) + '%;animation-duration:' + (7 + (i % 5) * 1.7) + 's;animation-delay:-' + (i * 1.3) + 's;transform:scale(' + (0.7 + (i % 4) * 0.25) + ')"></i>';
+  const roleCards = [['customer', 'user', 'ลูกค้า', 'จองโต๊ะ รับคิว สั่งอาหาร เช็คบิล', ['จองโต๊ะ & รับคิว', 'สั่งผ่าน QR ที่โต๊ะ', 'แยกบิล & จ่าย 3 วิธี']], ['staff', 'bell', 'พนักงาน', 'เรียกคิว จัดโต๊ะ เสิร์ฟ รับเงินสด', ['เรียกคิว & ยืนยันจอง', 'ผังโต๊ะ', 'งานเสิร์ฟ']], ['kitchen', 'chef', 'ครัว', 'ใบสั่งเรียงตามลำดับ ปิดเมนูเมื่อของหมด', ['KDS แบบ FIFO', 'จับเวลาปรุง', 'ปิด/เปิดเมนู']], ['owner', 'chart', 'เจ้าของร้าน', 'ยอดขาย เป้าหมาย สต็อก เมนู', ['แดชบอร์ดยอดขาย', 'เป้าหมายตาม SRS', 'จัดการเมนู & ราคา']]]
+    .map(r => '<button type="button" class="rolecard" data-act="role" data-arg="' + r[0] + '"><span class="ico">' + ic(r[1]) + '</span><h3>' + r[2] + '</h3><p>' + r[3] + '</p><ul>' + r[4].map(x => '<li>' + x + '</li>').join('') + '</ul></button>').join('');
+  const steps = [['table', 'จองโต๊ะ'], ['ticket', 'รับคิว'], ['user', 'ล็อกอิน'], ['utensils', 'สั่งอาหาร'], ['flame', 'ครัวปรุง'], ['bell', 'เสิร์ฟ'], ['receipt', 'เช็คบิล']];
+  return { tabs: null, body: '<div class="view stack"><section class="hero"><span class="kanji" aria-hidden="true">' + BRAND.kanji + '</span>' + petals + '<div class="eyebrow">Prototype · SRE & OOAD</div><h1>' + BRAND.tag + '</h1><p>ต้นแบบที่ใช้งานได้จริงในหน้าเดียว ครบทั้ง 4 บทบาท ตั้งแต่จองโต๊ะจนถึงเช็คบิล ข้อมูลทั้งหมดเป็นข้อมูลจำลองและไม่ใช้ฐานข้อมูล รีเฟรชหน้าแล้วกลับสู่ค่าเริ่มต้น</p><div class="row">' + btn('เริ่มเป็นลูกค้า', 'role', 'customer', 'primary', 'user') + '<button class="btn" data-act="gsplit" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)" ><span>' + ic('split') + '</span> เปิดโหมดนำเสนอ 2 จอ</button></div></section>' +
+    '<div><div class="sec-title"><h2>เลือกบทบาท</h2><p>ทุกบทบาททำงานบนข้อมูลชุดเดียวกัน สั่งจากฝั่งลูกค้าแล้วไปดูที่ครัวได้ทันที</p></div><div class="roles">' + roleCards + '</div></div>' +
+    '<div class="card"><div class="sec-title" style="margin-top:0"><h2>เส้นทางหนึ่งมื้อ</h2><p>เล่นตามลำดับนี้เพื่อดูทั้งกระบวนการ</p></div><div class="journey">' + steps.map(s => '<div class="step"><div class="bub">' + ic(s[0]) + '</div>' + s[1] + '</div>').join('') + '</div></div>' +
+    '<div class="card stack"><div><h3>ฟีเจอร์ในต้นแบบเทียบกับ SRS</h3><p class="hint">กดปุ่ม "รหัส UC" ที่แถบบนเพื่อแสดงป้าย UC บนหน้าจอของแต่ละฟังก์ชัน</p></div><div class="tscroll"><table class="t"><thead><tr><th>UC</th><th>ฟังก์ชัน</th><th>อยู่ที่ไหนในต้นแบบ</th></tr></thead><tbody>' + SRS_MAP.map(r => '<tr><td><b class="num">' + r[0] + '</b></td><td>' + r[1] + '</td><td class="muted">' + r[2] + '</td></tr>').join('') + '</tbody></table></div></div></div>' };
+};
+
+/* ---------- charts (single series, one axis, hover tips) ---------- */
+function salesChart() {
+  const today = isoDate(Clock.now()), data = HISTORY.map(h => ({ lbl: new Date(new Date().setDate(new Date().getDate() + h.d)).toLocaleDateString('th-TH', { weekday: 'short' }), v: h.sales, o: h.orders })).concat([{ lbl: 'วันนี้', v: salesToday(), o: ordersToday(), today: true }]);
+  const max = Math.max.apply(null, data.map(d => d.v)), top = Math.ceil(max / 10000) * 10000, W = 560, H = 230, L = 46, R = 8, T = 22, B = 28, iw = W - L - R, ih = H - T - B, bw = Math.min(40, iw / data.length * .56), gap = iw / data.length;
+  let g = '', ticks = ''; for (let i = 0; i <= 4; i++) { const v = top / 4 * i, y = T + ih - ih * v / top; ticks += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '" stroke-dasharray="' + (i ? '3 4' : '0') + '"/><text x="' + (L - 8) + '" y="' + (y + 4) + '" text-anchor="end">' + (v / 1000) + 'k</text>'; }
+  const maxI = data.reduce((m, d, i) => d.v > data[m].v ? i : m, 0);
+  data.forEach((d, i) => { const x = L + gap * i + (gap - bw) / 2, h = Math.max(2, ih * d.v / top), y = T + ih - h, r = Math.min(5, bw / 2);
+    g += '<g class="col" data-tip="' + d.lbl + ': ' + baht(d.v) + ' · ' + d.o + ' ออเดอร์"><path class="bar-m ' + (d.today ? 'today' : '') + '" d="M' + x + ' ' + (y + h) + 'V' + (y + r) + 'a' + r + ' ' + r + ' 0 0 1 ' + r + ' -' + r + 'h' + (bw - 2 * r) + 'a' + r + ' ' + r + ' 0 0 1 ' + r + ' ' + r + 'V' + (y + h) + 'z"/><rect class="hit" x="' + (L + gap * i) + '" y="' + T + '" width="' + gap + '" height="' + ih + '"/>' +
+      '<text x="' + (x + bw / 2) + '" y="' + (H - 9) + '" text-anchor="middle"' + (d.today ? ' class="lblv"' : '') + '>' + d.lbl + '</text>' + ((d.today || i === maxI) ? '<text class="lblv" x="' + (x + bw / 2) + '" y="' + (y - 6) + '" text-anchor="middle">' + (d.v / 1000).toFixed(1) + 'k</text>' : '') + '</g>'; });
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="ยอดขาย 7 วันล่าสุด หน่วยบาท">' + ticks + g + '</svg>';
+}
+function payMixHtml() {
+  const m = S.payMix, tot = m.cash + m.qr + m.transfer || 1, defs = [['qr', 'สแกนจ่าย', 'var(--s1)'], ['transfer', 'โอนพร้อมสลิป', 'var(--s2)'], ['cash', 'เงินสด', 'var(--s3)']];
+  return '<div class="stackbar" role="img" aria-label="สัดส่วนวิธีชำระเงิน">' + defs.map(d => '<i style="width:' + (m[d[0]] / tot * 100) + '%;background:' + d[2] + '" data-tip="' + d[1] + ' ' + m[d[0]] + ' บิล (' + Math.round(m[d[0]] / tot * 100) + '%)"></i>').join('') + '</div><div class="legend" style="margin-top:10px">' + defs.map(d => '<span><i style="background:' + d[2] + '"></i>' + d[1] + ' <b class="num">' + Math.round(m[d[0]] / tot * 100) + '%</b></span>').join('') + '</div>';
+}
+function topMenuHtml() {
+  const arr = Object.keys(S.sold).map(k => ({ m: menuItem(+k), n: S.sold[k] })).filter(x => x.m).sort((a, b) => b.n - a.n).slice(0, 6), mx = arr[0] ? arr[0].n : 1;
+  return arr.map(x => '<div class="hbar" data-tip="' + esc(x.m.name) + ': ' + x.n + ' ที่"><span>' + esc(x.m.name) + '</span><div class="tr"><i style="width:' + (x.n / mx * 100) + '%"></i></div><b>' + x.n + '</b></div>').join('');
+}
+
+function ownerOverview(p) {
+  const avgOrder = avg(S.orderTimes) / 1000, avgSend = avg(S.sendTimes) / 1000, sendTxt = S.sendTimes.length ? avgSend.toFixed(1) + ' วินาที' : '— (ยังไม่มีออเดอร์ใหม่)';
+  const goals = [['ออเดอร์หายไม่เกิน 1 ครั้งต่อวัน', S.lostOrders + ' ครั้งวันนี้', S.lostOrders <= 1], ['สั่งอาหารเสร็จภายใน 3 นาที', Math.floor(avgOrder / 60) + ' นาที ' + Math.round(avgOrder % 60) + ' วินาที (เฉลี่ย)', avgOrder <= 180], ['ลูกค้าใช้ซ้ำอย่างน้อย 4 ครั้ง', '4.3 ครั้ง (ข้อมูลจำลอง)', true], ['รอคิวไม่เกิน 10 นาที', '7.4 นาที (ข้อมูลจำลอง)', true], ['คิวคลาดเคลื่อนไม่เกิน 1%', '0.6% (ข้อมูลจำลอง)', true], ['ส่งออเดอร์ถึงครัวภายใน 3 วินาที', sendTxt, !S.sendTimes.length || avgSend <= 3]];
+  const lowStock = S.menu.filter(m => !avail(m) || m.stock <= 5);
+  return '<div class="view stack"><div class="kpis"><div class="kpi"><span>ยอดขายวันนี้</span><b>' + baht(salesToday()) + '</b><small class="muted">+' + baht(S.pays.reduce((s, x) => s + x.amount, 0)) + ' จากเดโม</small></div><div class="kpi"><span>ออเดอร์วันนี้</span><b>' + ordersToday() + '</b><small class="muted">ไม่รวมที่ยกเลิก</small></div><div class="kpi"><span>โต๊ะมีลูกค้า</span><b>' + S.tables.filter(t => t.status === 'occupied').length + '/' + S.tables.length + '</b><small class="muted">รอคิว ' + S.queue.list.filter(q => q.status === 'waiting').length + ' กลุ่ม</small></div><div class="kpi"><span>เมนูหมด/ใกล้หมด</span><b>' + lowStock.length + '</b><small class="muted">' + lowStock.slice(0, 2).map(m => esc(m.name)).join(', ') + '</small></div></div>' +
+    '<div class="cols2 w21"><div class="card stack"><div class="row between"><h3>ยอดขาย 7 วันล่าสุด (บาท)</h3><div class="legend"><span><i style="background:var(--s1)"></i>ย้อนหลัง</span><span><i style="background:var(--shu)"></i>วันนี้ (สด)</span></div></div>' + salesChart() + '<p class="hint">ข้อมูลย้อนหลังเป็นข้อมูลจำลอง ส่วนแท่งวันนี้เพิ่มขึ้นเมื่อมีการชำระเงินในเดโม</p></div>' +
+    '<div class="card stack"><h3>เป้าหมายตาม SRS</h3>' + goals.map(g => '<div class="goal"><span>' + g[0] + '</span>' + pill(g[2] ? 'ok' : 'bad', g[2] ? 'ผ่าน' : 'ไม่ผ่าน', g[2] ? 'check' : 'alert') + '<small>' + g[1] + '</small></div>').join('') + '</div></div>' +
+    '<div class="cols2"><div class="card stack"><h3>เมนูขายดี (จำนวนที่)</h3>' + topMenuHtml() + '</div><div class="card stack"><h3>วิธีชำระเงิน</h3>' + payMixHtml() + '<hr class="div"><h3>กิจกรรมล่าสุด</h3>' + logHtml(6) + '</div></div></div>';
+}
+
+function ownerMenu(p) {
+  const ui = p.ui, rows = S.menu.map(m => '<tr><td><div class="row" style="flex-wrap:nowrap"><div class="thumb" style="width:52px;height:40px;border-radius:8px;overflow:hidden;flex:none">' + art(m.art) + '</div><div><b>' + esc(m.name) + '</b><div class="hint">' + (CATS.find(c => c.id === m.cat) || {}).name + '</div></div></div></td>' +
+    '<td><input class="in" style="width:92px;min-height:36px" type="number" min="0" step="1" data-price="' + m.id + '" value="' + m.price + '" aria-label="ราคา ' + esc(m.name) + '"></td><td class="num">' + m.stock + ' ' + btn('+20', 'refill', m.id, 'sm') + '</td><td><div class="row" style="flex-wrap:nowrap"><button class="toggle" role="switch" aria-checked="' + !m.closed + '" data-act="toggleopen" data-arg="' + m.id + '" aria-label="เปิดขาย ' + esc(m.name) + '"></button><span class="hint">' + (m.closed ? 'ปิด' : 'เปิดขาย') + '</span></div></td></tr>').join('');
+  return '<div class="view stack"><div class="sec-title"><h2>จัดการเมนู</h2><p>แก้ราคา เติมสต็อก เปิด/ปิดขาย มีผลกับหน้าลูกค้าทันที</p></div><div class="card"><div class="tscroll"><table class="t"><thead><tr><th>เมนู</th><th>ราคา (฿)</th><th>สต็อก</th><th>เปิดขาย</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>' +
+    '<form class="card stack" data-submit="addmenu"><h3>เพิ่มเมนูใหม่</h3><div class="fgrid"><label class="field"><span>ชื่อเมนู</span>' + inp(ui, 'nm_name', 'placeholder="เช่น ปลาไหลย่างหน้าข้าว"') + '</label><label class="field"><span>ราคา (฿)</span>' + inp(ui, 'nm_price', 'type="number" min="1" placeholder="120"') + '</label><label class="field"><span>หมวด</span><select class="in" data-bind="nm_cat">' + CATS.map(c => '<option value="' + c.id + '"' + ((ui.nm_cat || 'sushi') === c.id ? ' selected' : '') + '>' + c.name + '</option>').join('') + '</select></label></div>' + (ui.nm_msg ? msg(ui.nm_msg.ok ? 'ok' : 'err', esc(ui.nm_msg.t)) : '') + '<div><button class="btn primary">' + ic('plus') + 'เพิ่มเมนู</button></div></form></div>';
+}
+
+function ownerTeam(p) {
+  const locks = Object.keys(S.lock).filter(k => S.lock[k].fails > 0 || S.lock[k].until);
+  return '<div class="view cols2"><div class="card stack"><h3>บัญชีผู้ใช้ (ตัวอย่าง)</h3><div class="tscroll"><table class="t"><thead><tr><th>บทบาท</th><th>ชื่อผู้ใช้</th><th>สถานะ</th></tr></thead><tbody>' +
+    [['ลูกค้า (สมาชิก)', MEMBERS[0].user, S.cust.auth && S.cust.auth.type === 'member'], ['พนักงานหน้าร้าน', STAFF_ACCOUNTS.staff.user, !!S.auth.staff], ['พนักงานครัว', STAFF_ACCOUNTS.kitchen.user, !!S.auth.kitchen], ['เจ้าของร้าน', STAFF_ACCOUNTS.owner.user, !!S.auth.owner]].map(r => '<tr><td>' + r[0] + '</td><td><span class="code">' + r[1] + '</span></td><td>' + pill(r[2] ? 'ok' : '', r[2] ? 'ออนไลน์' : 'ออฟไลน์') + '</td></tr>').join('') + '</tbody></table></div></div>' +
+    '<div class="card stack"><h3>ความพยายามล็อกอินผิด' + uc('UC-01') + '</h3>' + (locks.length ? locks.map(k => { const L = S.lock[k], left = L.until > Clock.now() ? L.until - Clock.now() : 0; return '<div class="row between"><span><span class="code">' + k.split(':')[1] + '</span> · ผิด ' + L.fails + '/5 ครั้ง</span>' + (left ? pill('bad', 'ล็อกอีก ' + mmss(left)) : pill('warn', 'ยังไม่ล็อก')) + '</div>'; }).join('') : '<p class="hint">ยังไม่มีการล็อกอินผิด ลองกรอกรหัสผ่านผิด 5 ครั้งที่หน้าล็อกอิน</p>') + '</div>' +
+    '<div class="card stack" style="grid-column:1/-1"><h3>บันทึกกิจกรรมของระบบ</h3>' + logHtml(30) + '</div></div>';
+}
+
+VIEWS.owner = function (p) {
+  const ui = p.ui;
+  if (!S.auth.owner) return { tabs: null, body: '<div class="view">' + loginCard(p, 'owner', { sub: 'ดูภาพรวมร้านและจัดการเมนู' }) + '</div>' };
+  const tab = ui.otab || 'overview', tabs = [{ id: 'overview', label: 'ภาพรวม', icon: 'chart' }, { id: 'menu', label: 'จัดการเมนู', icon: 'utensils' }, { id: 'team', label: 'ผู้ใช้ & บันทึก', icon: 'users' }];
+  return { tabs, tab, key: 'otab', who: S.auth.owner.name, role: 'owner', body: tab === 'overview' ? ownerOverview(p) : tab === 'menu' ? ownerMenu(p) : ownerTeam(p) };
+};
+
+/* ===== main.js : panes, events, demo panel ===== */
+const PANES = [];
+const G = { split: false, demo: false };
+const ROLES = [['home', 'หน้าแรก', 'home'], ['customer', 'ลูกค้า', 'user'], ['staff', 'พนักงาน', 'bell'], ['kitchen', 'ครัว', 'chef'], ['owner', 'เจ้าของร้าน', 'chart']];
+const visibleRoles = () => PANES.map(p => p.role);
+
+function newUI() {
+  const today = isoDate(Clock.now()), allPast = SLOT_TIMES.every(x => slotIsPast(today, x)), d = allPast ? addDays(today, 1) : today;
+  const first = SLOT_TIMES.find(x => !slotIsPast(d, x) && toMin(x) >= 18 * 60) || SLOT_TIMES.find(x => !slotIsPast(d, x)) || '19:00';
+  return { bname: '', bphone: '', bdate: d, btime: first, bpeople: 2, qname: '', qpeople: 2, split: 1, avoid: [], cat: 'all', q: '', osub: 'menu', slipMode: 'ok' };
+}
+function makePane(id, role) {
+  const el = document.createElement('section'); el.className = 'pane'; el.dataset.pane = id;
+  el.innerHTML = '<div class="pane-head"></div><div class="pane-body"></div><div class="pane-overlay"></div>';
+  $('#stage').appendChild(el);
+  const p = { id, el, role, ui: newUI(), overlay: '', key: '' }; PANES.push(p); return p;
+}
+
+function renderPane(p) {
+  p.overlay = '';
+  const v = VIEWS[p.role](p), head = $('.pane-head', p.el), body = $('.pane-body', p.el), ov = $('.pane-overlay', p.el);
+  const a = document.activeElement, bind = a && p.el.contains(a) && a.dataset ? a.dataset.bind : null, selS = bind && a.selectionStart != null ? [a.selectionStart, a.selectionEnd] : null;
+  const sc = body.scrollTop, osc = ($('.sheet .sbody', p.el) || {}).scrollTop || 0;
+  const tabs = v.tabs ? '<div class="subtabs" role="tablist">' + v.tabs.map(t => '<button class="subtab" role="tab" aria-selected="' + (v.tab === t.id) + '" data-act="tab" data-arg="' + v.key + ':' + t.id + '">' + ic(t.icon) + t.label + (t.badge ? '<span class="badge">' + t.badge + '</span>' : '') + '</button>').join('') + (v.who ? '<span style="margin-left:auto;align-self:center;display:flex;gap:8px;align-items:center;padding-bottom:4px" class="hint split-only-hide"><span>' + esc(v.who) + '</span><button class="btn sm" data-act="logout" data-arg="' + v.role + '">' + ic('logout') + 'ออก</button></span>' : '') + '</div>' : '';
+  head.innerHTML = '<div class="roletabs" role="tablist" aria-label="เลือกบทบาท">' + ROLES.map(r => '<button class="roletab" role="tab" aria-selected="' + (p.role === r[0]) + '" data-act="role" data-arg="' + r[0] + '">' + ic(r[2]) + r[1] + '</button>').join('') + '</div>' + tabs;
+  body.innerHTML = v.body; ov.innerHTML = p.overlay;
+  const key = p.role + ':' + (v.tab || '');
+  if (key !== p.key) { p.key = key; body.classList.remove('enter'); void body.offsetWidth; body.classList.add('enter'); clearTimeout(p._et); p._et = setTimeout(() => body.classList.remove('enter'), 700); } else body.scrollTop = sc;
+  const sb = $('.sheet .sbody', p.el); if (sb) sb.scrollTop = osc;
+  if (bind) { const n = p.el.querySelector('[data-bind="' + bind.replace(/"/g, '\\"') + '"]'); if (n && n.type !== 'radio') { n.focus({ preventScroll: true }); if (selS && n.setSelectionRange && /text|search|tel|password/.test(n.type)) try { n.setSelectionRange(selS[0], selS[1]); } catch (e) { } } }
+  updateTimers();
+}
+function renderAll() { PANES.forEach(renderPane); renderDemo(); }
+subs.push(renderAll);
+
+/* ---------- helpers ---------- */
+const paneOf = el => PANES.find(p => p.el.contains(el));
+const partIdx = p => { const b = S.bills[S.cust.tableId]; if (!b) return -1; const f = b.parts.findIndex(x => x.status !== 'paid'); const i = p.ui.payIdx; return i != null && b.parts[i] && b.parts[i].status !== 'paid' ? i : f; };
+function sampleSlipURI(amount) {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="320" viewBox="0 0 240 320"><rect width="240" height="320" fill="#fff"/><rect width="240" height="64" fill="#1B3A6B"/><text x="120" y="40" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#fff">โอนเงินสำเร็จ</text><circle cx="120" cy="108" r="24" fill="#2BA36B"/><path d="M108 108l9 9 16-19" stroke="#fff" stroke-width="5" fill="none"/><text x="120" y="170" text-anchor="middle" font-family="sans-serif" font-size="30" font-weight="700" fill="#1a1a1a">' + (amount || 0).toLocaleString('en-US') + '.00 บาท</text><text x="120" y="204" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#666">ไปยัง SAKURAYA</text><text x="120" y="228" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#999">ตัวอย่างสลิป (ไม่ใช่ของจริง)</text><rect x="24" y="262" width="192" height="1" fill="#ddd"/><text x="24" y="290" font-family="sans-serif" font-size="12" fill="#999">รหัสอ้างอิง SAMPLE-0001</text></svg>';
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+function setSplit(on) {
+  G.split = on; $('#stage').classList.toggle('split', on);
+  if (on && PANES.length < 2) { const a = PANES[0]; if (a.role === 'home') a.role = 'customer'; makePane('b', a.role === 'kitchen' ? 'customer' : 'kitchen'); }
+  if (!on && PANES.length > 1) { PANES.pop().el.remove(); }
+  const b = $('[data-g="split"]'); if (b) b.setAttribute('aria-pressed', on);
+  emit();
+}
+function startQuickDemo(p) {
+  const c = S.cust;
+  if (!c.tableId) { if (!c.seated) quickSeat(); const t = c.seated; if (!scanTable(t)) { const free = S.tables.find(x => x.status === 'occupied' && !x.claimed); if (free) scanTable(free.id); } }
+  if (!c.auth) c.auth = { type: 'guest', name: 'Guest' };
+  if (!c.cart.length) [1, 10, 19].forEach(id => addCart(id, 1));
+  p.role = 'customer'; p.ui.ctab = 'order'; p.ui.osub = 'menu'; p.ui.cartOpen = true; p.ui.sheetFresh = true; emit();
+}
+
+/* ---------- actions ---------- */
+const ACT = {
+  role(p, el, a) { p.role = a; emit(); window.scrollTo({ top: 0 }); },
+  tab(p, el, a) { const [k, v] = a.split(':'); p.ui[k] = v; emit(); },
+  gsplit() { setSplit(!G.split); },
+  goorder(p) { p.ui.ctab = 'order'; emit(); },
+  gobill(p) { p.ui.ctab = 'bill'; emit(); },
+  quickseat() { const t = quickSeat(); if (t) toast('พนักงานจัดโต๊ะ T' + t + ' ให้แล้ว', 'ok'); else toast('ตอนนี้ไม่มีโต๊ะว่าง', 'warn'); emit(); },
+  scantable(p, el, a) { if (scanTable(+a)) { p.ui.osub = 'menu'; toast('สแกนโต๊ะ T' + a + ' สำเร็จ', 'ok'); } emit(); },
+  fillcred(p, el, a) { const acc = a === 'customer' ? MEMBERS[0] : STAFF_ACCOUNTS[a]; p.ui['lu_' + a] = acc.user; p.ui['lp_' + a] = acc.pass; p.ui['lmsg_' + a] = null; emit(); },
+  guest(p) { S.cust.auth = { type: 'guest', name: 'Guest' }; S.cust.menuOpenedAt = Clock.now(); logEv('customer', 'ใช้งานแบบ Guest'); emit(); },
+  logout(p, el, a) { logout(a); emit(); },
+  cat(p, el, a) { p.ui.cat = a; emit(); },
+  alg(p, el, a) { const v = p.ui.avoid, i = v.indexOf(a); if (i >= 0) v.splice(i, 1); else v.push(a); emit(); },
+  osub(p, el, a) { p.ui.osub = a; p.ui.ctab = 'order'; emit(); },
+  cart(p) { p.ui.cartOpen = true; p.ui.sheetFresh = true; p.ui.cartIssues = null; emit(); },
+  cartclose(p) { p.ui.cartOpen = false; emit(); },
+  add(p, el, a) { const r = addCart(+a, 1); if (!r.ok) toast(r.msg, 'warn'); p.ui.bump = true; emit(); setTimeout(() => { p.ui.bump = false; }, 400); },
+  cartqty(p, el, a) { const [id, d] = a.split(':').map(Number), r = addCart(id, d); if (!r.ok) toast(r.msg, 'warn'); if (!S.cust.cart.length) p.ui.cartOpen = p.ui.cartOpen && true; emit(); },
+  confirm(p) {
+    const r = placeOrder();
+    if (!r.ok) { p.ui.cartIssues = r.issues; emit(); return; }
+    p.ui.cartOpen = false; p.ui.cartIssues = null; p.ui.osub = 'orders'; toast('ส่งคำสั่งซื้อ #' + r.order.id + ' แล้ว', 'ok'); emit();
+  },
+  retry(p, el, a) { const o = S.orders.find(x => x.id === +a); if (o && o.status === 'send_failed') attemptSend(o); },
+  cancel(p, el, a) { if (cancelOrder(+a)) toast('ยกเลิกออเดอร์ #' + a + ' แล้ว คืนสต็อกเรียบร้อย', 'ok'); emit(); },
+  callstaff(p) { const id = Date.now(); S.calls.push({ id, tid: S.cust.tableId, at: Clock.now() }); notify('staff', 'โต๊ะ T' + S.cust.tableId + ' เรียกพนักงาน', 'warn'); toast('แจ้งพนักงานแล้ว', 'ok'); emit(); },
+  split(p, el, a) { const d = +a.split(':')[1]; p.ui.split = Math.max(1, Math.min(6, p.ui.split + d)); emit(); },
+  bpeople(p, el, a) { const d = +a.split(':')[1]; p.ui.bpeople = Math.max(1, Math.min(8, p.ui.bpeople + d)); p.ui.bres = null; emit(); },
+  qpeople(p, el, a) { const d = +a.split(':')[1]; p.ui.qpeople = Math.max(1, Math.min(8, p.ui.qpeople + d)); emit(); },
+  pickalt(p, el, a) { p.ui.btime = a; p.ui.bres = null; emit(); },
+  cbook(p, el, a) { cancelBooking(a); emit(); },
+  qscan(p) { p.ui.qscan = true; emit(); },
+  openbill(p) { if (openBill(S.cust.tableId, p.ui.split)) { p.ui.payIdx = null; p.ui.pm = null; } emit(); },
+  pm(p, el, a) { p.ui.pm = a; p.ui.slipRes = null; emit(); },
+  paycash(p) { payCash(S.cust.tableId, partIdx(p)); emit(); },
+  payqr(p) { payQR(S.cust.tableId, partIdx(p)); },
+  sampleslip(p) { const b = S.bills[S.cust.tableId], i = partIdx(p); p.ui.slipName = 'สลิปตัวอย่าง.svg'; p.ui.slipSig = 'SAMPLE-SLIP'; p.ui.slipData = sampleSlipURI(b.parts[i].amount); p.ui.slipRes = null; emit(); },
+  payslip(p) {
+    const i = partIdx(p); paySlip(S.cust.tableId, i, p.ui.slipSig, p.ui.slipMode || 'ok', res => {
+      p.ui.slipRes = res; if (res === 'ok') { p.ui.slipName = null; p.ui.slipSig = null; p.ui.slipData = null; p.ui.pm = null; toast('ตรวจสลิปผ่าน บันทึกการชำระแล้ว', 'ok'); } else toast(res === 'dup' ? 'สลิปซ้ำ กรุณาชำระใหม่' : 'ยอดไม่ตรง กรุณาชำระใหม่', 'warn');
+    });
+  },
+  newvisit(p) { S.cust.receipt = null; p.ui.ctab = 'book'; p.ui.osub = 'menu'; p.ui.pm = null; p.ui.bres = null; emit(); },
+  /* staff */
+  serve(p, el, a) { markServed(+a); emit(); },
+  cashok(p, el, a) { const [t, i] = a.split(':').map(Number); confirmCash(t, i); emit(); },
+  calldone(p, el, a) { const c = S.calls.find(x => x.id === +a); if (c) c.done = true; emit(); },
+  callq(p) { const q = callNextQueue(); if (q) toast('เรียกคิว ' + q.no + ' แล้ว', 'ok'); emit(); },
+  skipq(p, el, a) { skipQueue(a); emit(); },
+  seatq(p, el, a) { p.ui.seat = a; p.ui.seatFresh = true; emit(); },
+  seatclose(p) { p.ui.seat = null; emit(); },
+  seatpick(p, el, a) { if (seatQueue(p.ui.seat, +a)) toast('จัดโต๊ะ T' + a + ' ให้คิว ' + p.ui.seat + ' แล้ว', 'ok'); p.ui.seat = null; emit(); },
+  arrive(p, el, a) { if (confirmArrival(a)) toast('ยืนยันการมาถึงแล้ว จัดโต๊ะเรียบร้อย', 'ok'); else toast('ไม่มีโต๊ะว่างที่นั่งพอ ปรับสถานะโต๊ะก่อน', 'warn'); emit(); },
+  tstatus(p, el, a) { const [id, st] = a.split(':'); setTableStatus(+id, st); emit(); },
+  /* kitchen */
+  cook(p, el, a) { startCooking(+a); emit(); },
+  ready(p, el, a) { markReady(+a); emit(); },
+  mockorder() { addMockOrder(); emit(); },
+  setclose(p, el, a) { setClosed(+a, true, 'วัตถุดิบหมด'); emit(); },
+  setopen(p, el, a) { const m = menuItem(+a); if (m.stock <= 0) m.stock = 10; setClosed(+a, false); emit(); },
+  /* owner */
+  refill(p, el, a) { menuItem(+a).stock += 20; emit(); },
+  toggleopen(p, el, a) { const m = menuItem(+a); setClosed(m.id, !m.closed, 'ปิดโดยเจ้าของร้าน'); if (m.stock <= 0 && !m.closed) m.stock = 10; emit(); },
+  /* demo */
+  demotoggle() { G.demo = !G.demo; const d = $('#demo'); d.hidden = !G.demo; $('[data-g="demo"]').setAttribute('aria-pressed', G.demo); renderDemo(); },
+  speed(p, el, a) { Clock.set(+a); emit(); },
+  failnext() { S.failNext = !S.failNext; emit(); },
+  demoquick(p) { startQuickDemo(PANES[0].role === 'customer' || !G.split ? PANES[0] : PANES[0]); },
+  demoqueue() { const names = ['คุณหมิว', 'คุณต้น', 'คุณแพร', 'คุณโอ๊ต']; S.queue.list.push({ no: 'A' + String(S.queue.seq++).padStart(3, '0'), name: names[Math.floor(Math.random() * names.length)], people: 2 + Math.floor(Math.random() * 3), status: 'waiting', at: Clock.now() }); emit(); },
+  demoreset() { Clock.set(1); initState(); PANES.forEach(q => { q.ui = newUI(); q.key = ''; }); toast('รีเซ็ตข้อมูลเดโมแล้ว', 'ok'); emit(); },
+  theme() { const d = document.documentElement, dark = d.getAttribute('data-theme') === 'dark' || (!d.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches); d.setAttribute('data-theme', dark ? 'light' : 'dark'); renderTop(); },
+  uc() { const on = document.body.classList.toggle('show-uc'); $('[data-g="uc"]').setAttribute('aria-pressed', on); }
+};
+const SUBMIT = {
+  login(p, role) {
+    const r = attemptLogin(role, p.ui['lu_' + role], p.ui['lp_' + role]);
+    if (r.ok) { p.ui['lu_' + role] = ''; p.ui['lp_' + role] = ''; p.ui['lmsg_' + role] = null; if (role === 'customer') S.cust.menuOpenedAt = Clock.now(); toast('เข้าสู่ระบบสำเร็จ', 'ok'); }
+    else p.ui['lmsg_' + role] = r.locked ? 'บัญชีถูกล็อก 5 นาที' : 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง (เหลืออีก ' + r.left + ' ครั้งก่อนล็อกบัญชี)';
+    emit();
+  },
+  book(p) { const u = p.ui; u.bres = makeBooking({ name: u.bname, phone: u.bphone, date: u.bdate, time: u.btime, people: u.bpeople }); if (u.bres.ok) { u.bname = ''; u.bphone = ''; } emit(); },
+  takeq(p) { takeQueue(p.ui.qname || custName(), p.ui.qpeople); p.ui.qscan = false; p.ui.qname = ''; emit(); },
+  addmenu(p) {
+    const u = p.ui, name = (u.nm_name || '').trim(), price = +u.nm_price, cat = u.nm_cat || 'sushi';
+    if (!name || !(price > 0)) { u.nm_msg = { ok: false, t: 'กรอกชื่อเมนูและราคาให้ครบ' }; emit(); return; }
+    const kinds = { sushi: 'nigiri', sashimi: 'sashimi', noodle: 'ramen', don: 'don', fried: 'tempura', sweet: 'mochi', drink: 'tea' };
+    S.menu.push({ id: Math.max.apply(null, S.menu.map(m => m.id)) + 1, cat, name, ja: '新', price, all: [], prep: 5, stock: 20, art: [kinds[cat], '#D9753F', '#FFE2C2'], desc: 'เมนูใหม่จากเจ้าของร้าน', tag: 'ใหม่', closed: false, closedReason: '' });
+    u.nm_name = ''; u.nm_price = ''; u.nm_msg = { ok: true, t: 'เพิ่มเมนู "' + name + '" แล้ว ลูกค้าเห็นทันที' }; emit();
+  }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  if (el.classList.contains('sheet-wrap') && e.target !== el) return;
+  const p = paneOf(el) || PANES[0], fn = ACT[el.dataset.act]; if (!fn) return;
+  fn(p, el, el.dataset.arg);
+});
+document.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-submit]'); if (!f) return; e.preventDefault();
+  const p = paneOf(f); if (p) SUBMIT[f.dataset.submit](p, f.dataset.arg);
+});
+function onBind(e) {
+  const el = e.target;
+  if (el.id === 'slipfile') {
+    const f = el.files && el.files[0], p = paneOf(el); if (!f || !p) return;
+    if (!/^image\//.test(f.type) || f.size > 5 * 1024 * 1024) { toast('แนบได้เฉพาะไฟล์ภาพขนาดไม่เกิน 5 MB', 'warn'); return; }
+    const rd = new FileReader(); rd.onload = () => { p.ui.slipName = f.name; p.ui.slipSig = f.name + '|' + f.size + '|' + f.lastModified; p.ui.slipData = rd.result; p.ui.slipRes = null; emit(); }; rd.readAsDataURL(f); return;
+  }
+  if (el.dataset && el.dataset.price) { const m = menuItem(+el.dataset.price), v = Math.max(0, Math.round(+el.value || 0)); if (e.type === 'change' && m) { m.price = v; logEv('owner', 'แก้ราคา ' + m.name + ' เป็น ' + baht(v)); emit(); } return; }
+  const key = el.dataset && el.dataset.bind; if (!key) return;
+  const isText = el.tagName === 'INPUT' && /text|search|tel|password|number/.test(el.type), isChoice = el.tagName === 'SELECT' || el.type === 'date' || el.type === 'radio';
+  if ((isText && e.type !== 'input') || (isChoice && e.type !== 'change')) return;
+  const p = paneOf(el); if (!p) return;
+  if (key.indexOf('note:') === 0) { const l = S.cust.cart.find(x => x.id === +key.slice(5)); if (l) l.note = el.value; return; }
+  p.ui[key] = el.value; if (key === 'bdate' || key === 'btime' || key === 'bphone' || key === 'bname') p.ui.bres = null;
+  if (el.dataset.rr) renderPane(p);
+}
+document.addEventListener('input', onBind); document.addEventListener('change', onBind);
+
+/* chart tooltips */
+(function () {
+  let tip = null;
+  const show = (e) => { const t = e.target.closest('[data-tip]'); if (!t) { if (tip) { tip.remove(); tip = null; } return; } if (!tip) { tip = document.createElement('div'); tip.className = 'tip'; document.body.appendChild(tip); } tip.textContent = t.dataset.tip; tip.style.left = e.clientX + 'px'; tip.style.top = e.clientY + 'px'; };
+  document.addEventListener('pointermove', show); document.addEventListener('pointerdown', show);
+  document.addEventListener('pointerleave', () => { if (tip) { tip.remove(); tip = null; } });
+})();
+
+/* ---------- top bar & demo panel ---------- */
+function renderTop() {
+  const d = document.documentElement, dark = d.getAttribute('data-theme') === 'dark' || (!d.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+  $('.top-actions').innerHTML = '<button class="tbtn" data-g="uc" data-act="uc" aria-pressed="' + document.body.classList.contains('show-uc') + '" title="แสดงป้าย Use Case ของ SRS">' + ic('tag') + '<span>รหัส UC</span></button>' +
+    '<button class="tbtn split-only-wide" data-g="split" data-act="gsplit" aria-pressed="' + G.split + '" title="แสดง 2 บทบาทพร้อมกัน">' + ic('split') + '<span>นำเสนอ 2 จอ</span></button>' +
+    '<button class="tbtn" data-g="demo" data-act="demotoggle" aria-pressed="' + G.demo + '">' + ic('wand') + '<span>เดโม</span></button>' +
+    '<button class="tbtn" data-act="theme" aria-label="สลับโหมดสว่าง/มืด">' + ic(dark ? 'sun' : 'clock').replace(ICONS.clock, dark ? ICONS.sun : '<path d="M20 14a8 8 0 1 1-10-10 7 7 0 0 0 10 10z"/>') + '<span>' + (dark ? 'โหมดสว่าง' : 'โหมดมืด') + '</span></button>';
+}
+function renderDemo() {
+  const d = $('#demo'); if (!d || d.hidden) return;
+  const sp = Clock.speed;
+  d.innerHTML = '<h3>แผงควบคุมเดโม<button class="iconbtn" data-act="demotoggle" aria-label="ปิด">' + ic('x') + '</button></h3>' +
+    '<div class="stack" style="gap:6px"><span class="lbl">ความเร็วของเวลา (คิว ไม่มาภายใน 10 นาที ล็อก 5 นาที)</span><div class="seg" role="group">' + [1, 10, 60].map(s => '<button data-act="speed" data-arg="' + s + '" aria-pressed="' + (sp === s) + '">×' + s + '</button>').join('') + '</div></div>' +
+    '<div class="dswitch"><span>จำลองส่งครัวไม่สำเร็จ (ออเดอร์ถัดไป)' + uc('UC-13') + '</span><button class="toggle" role="switch" aria-checked="' + S.failNext + '" data-act="failnext" aria-label="จำลองส่งครัวไม่สำเร็จ"></button></div>' +
+    btn('เริ่มทดลองสั่งอาหารทันที', 'demoquick', null, 'primary block', 'wand') + btn('เพิ่มออเดอร์จากโต๊ะอื่น (ครัว)', 'mockorder', null, 'block', 'plus') + btn('เพิ่มคิวจำลอง 1 กลุ่ม', 'demoqueue', null, 'block', 'ticket') + btn('รีเซ็ตข้อมูลทั้งหมด', 'demoreset', null, 'block danger', 'refresh') +
+    '<p class="hint">ข้อมูลทั้งหมดอยู่ในหน้านี้เท่านั้น ไม่มีฐานข้อมูล รีเฟรชแล้วกลับสู่ค่าเริ่มต้น</p>';
+}
+
+/* ---------- boot ---------- */
+function boot() {
+  initState();
+  document.body.insertAdjacentHTML('afterbegin',
+    '<header class="top"><div class="top-in"><div class="brand"><span class="mark" aria-hidden="true">' + BRAND.kanji.charAt(0) + '</span><div><b>' + BRAND.name + '</b><small>' + BRAND.tag + ' · ต้นแบบ</small></div></div><div class="top-actions"></div></div></header><main class="stage" id="stage"></main><aside id="demo" hidden aria-label="แผงควบคุมเดโม"></aside><div id="toasts" aria-live="polite"></div>');
+  const h = (location.hash || '').replace('#', ''), start = ROLES.some(r => r[0] === h) ? h : 'home';
+  makePane('a', start);
+  renderTop(); renderAll();
+  setInterval(tick, 1000);
+  setInterval(() => { if (!isTyping()) emit(); }, 5000);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener && matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderTop);
+}
+boot();
+
+
+</script>
+
+</body></html>
